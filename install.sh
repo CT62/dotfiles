@@ -23,6 +23,8 @@ PACKAGES=(
   jq python3-i3ipc
   # font used across every module (bars, i3, kitty, qutebrowser)
   cascadia-mono-nf-fonts
+  # system info on terminal open (see fastfetch/)
+  fastfetch git
 )
 
 if command -v dnf >/dev/null 2>&1; then
@@ -55,6 +57,28 @@ link "$REPO_DIR/rice"        "$HOME/.config/rice"
 link "$REPO_DIR/picom"       "$HOME/.config/picom"
 link "$REPO_DIR/gammastep"   "$HOME/.config/gammastep"
 link "$REPO_DIR/flameshot"   "$HOME/.config/flameshot"
+link "$REPO_DIR/fastfetch"   "$HOME/.config/fastfetch"
+
+# pokemon-colorscripts isn't packaged for Fedora — clone it straight from
+# its repo and symlink the entrypoint into ~/.local/bin. fastfetch/run.sh
+# shows a random Pokemon as the logo on every terminal open; it degrades
+# to the plain themed logo if this ever isn't on PATH.
+POKEMON_DIR="$HOME/.local/share/pokemon-colorscripts"
+if [ ! -d "$POKEMON_DIR" ]; then
+  echo "Cloning pokemon-colorscripts..."
+  git clone --depth 1 https://gitlab.com/phoneybadger/pokemon-colorscripts.git "$POKEMON_DIR"
+fi
+chmod +x "$POKEMON_DIR/pokemon-colorscripts.py"
+mkdir -p "$HOME/.local/bin"
+link "$POKEMON_DIR/pokemon-colorscripts.py" "$HOME/.local/bin/pokemon-colorscripts"
+
+# Append the fastfetch-on-shell-open snippet to .bashrc if it's not there yet
+# (appended, not symlinked, so Fedora's default .bashrc content is kept).
+BASHRC_MARKER="# Animated, theme-matched fastfetch on new interactive shells"
+if ! grep -qF "$BASHRC_MARKER" "$HOME/.bashrc" 2>/dev/null; then
+  echo "Adding fastfetch startup snippet to ~/.bashrc"
+  { echo; cat "$REPO_DIR/fastfetch/bashrc-snippet.sh"; } >> "$HOME/.bashrc"
+fi
 
 mkdir -p "$HOME/Downloads"
 link "$REPO_DIR/wallpapers/wallpaper"    "$HOME/Downloads/wallpaper"

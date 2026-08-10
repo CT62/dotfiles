@@ -105,8 +105,15 @@ bindsym $mod+Shift+p exec --no-startup-id ~/.config/polybar/powermenu.sh
 bindsym $mod+Shift+t exec --no-startup-id ~/.config/rice/toggle-theme.sh
 
 # save / restore the focused workspace's layout (i3-save-tree based)
-bindsym $mod+Shift+y exec --no-startup-id ~/.config/rice/save-layout.sh
+bindsym $mod+Shift+u exec --no-startup-id ~/.config/rice/save-layout.sh
 bindsym $mod+y exec --no-startup-id ~/.config/rice/restore-layout.sh
+
+# toggle the bottom polybar (and re-layout the top bar to compensate)
+bindsym $mod+Shift+y exec --no-startup-id ~/.config/polybar/toggle-bottom.sh
+
+# volumeicon briefly shows a blank top-level window before it embeds into
+# the systray on (re)start; keep it off-screen for that instant.
+for_window [class="Volumeicon"] move scratchpad
 
 # Scratchpad dropdown terminal: $mod+grave summons/hides a kitty marked
 # "scratch_term", spawning it on first use (see scratch-toggle.sh).

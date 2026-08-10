@@ -5,6 +5,7 @@ launcher, compositor, lock screen, and wallpapers — three swappable themes
 (bw / invert / catppuccin) that toggle together across all of it.
 
 ![Rice screenshot](screenshots/rice.png)
+![Rice screenshot](screenshots/rice-2.png)
 
 ## Install (Fedora)
 
@@ -35,6 +36,7 @@ After installing, log out and back into i3, or run
 | `picom/` | Compositor: fades, shadows, rounded corners, open/close animations |
 | `gammastep/` | Fixed dawn/dusk color temperature window (no longer auto-started; see `gammastep-prompt` below) |
 | `flameshot/` | Screenshot tool config |
+| `fastfetch/` | Theme-matched, animated system-info banner on new terminals — always shows a random Pokemon (via `pokemon-colorscripts`, auto-cloned by `install.sh`) instead of a plain logo |
 | `rice/` | The glue: `toggle-theme.sh` (cycles bw → invert → catppuccin across everything), `set-wallpaper.sh`, lock screen, on-screen volume/brightness display, workspace layout save/restore, scratchpad terminal, focus-border pulse, `gammastep-prompt.sh` (dusk notification asking whether to turn on warm colors, fired by the `gammastep-prompt` systemd --user timer below), Obsidian theme CSS |
 | `systemd/user/` | `gammastep-prompt.timer` fires at 19:00 daily, running `gammastep-prompt.service` → `rice/gammastep-prompt.sh` |
 | `wallpapers/` | Images `set-wallpaper.sh` picks from at random — `wallpaper/` for the catppuccin theme, `wallpaper-bw/` for bw/invert |
@@ -59,5 +61,6 @@ or configure them separately if you use them:
 
 See `i3/config` for the full list. The highlights: `$mod+d` rofi launcher,
 `$mod+Shift+t` cycle theme, `$mod+Shift+v` clipboard history,
-`` $mod+` `` scratchpad terminal, `$mod+Shift+y` / `$mod+y` save/restore
-layout, `$mod+Shift+s` region screenshot to clipboard, `Print` flameshot.
+`` $mod+` `` scratchpad terminal, `$mod+Shift+u` / `$mod+y` save/restore
+layout, `$mod+Shift+y` toggle the bottom bar, `$mod+Shift+s` region
+screenshot to clipboard, `Print` flameshot.
