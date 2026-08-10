@@ -4,6 +4,8 @@ My full i3 rice: window manager, bars, terminal, browser, notifications,
 launcher, compositor, lock screen, and wallpapers — three swappable themes
 (bw / invert / catppuccin) that toggle together across all of it.
 
+![Rice screenshot](screenshots/rice.png)
+
 ## Install (Fedora)
 
 ```
