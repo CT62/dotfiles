@@ -27,15 +27,16 @@ After installing, log out and back into i3, or run
 | Folder | What it is |
 | --- | --- |
 | `i3/` | Window manager config + per-theme border/title colors |
-| `polybar/` | Top bar (workspaces, temp, now-playing, cpu/mem, date) and bottom bar (duf-style `/` usage, uptime, volume, battery) |
+| `polybar/` | Top bar (workspaces, temp, date, cpu/mem bars via `cpu.sh`/`mem.sh`) and bottom bar (duf-style `/` usage, uptime, now-playing, volume, battery) |
 | `kitty/` | Terminal config + per-theme colors |
 | `dunst/` | Notification daemon config, per theme |
 | `rofi/` | Launcher, calculator, emoji picker, clipboard picker (scripts + per-theme `.rasi`) |
 | `qutebrowser/` | Browser config (theme-aware, reads `rice/theme`) |
 | `picom/` | Compositor: fades, shadows, rounded corners, open/close animations |
-| `gammastep/` | Fixed dawn/dusk color temperature schedule |
+| `gammastep/` | Fixed dawn/dusk color temperature window (no longer auto-started; see `gammastep-prompt` below) |
 | `flameshot/` | Screenshot tool config |
-| `rice/` | The glue: `toggle-theme.sh` (cycles bw → invert → catppuccin across everything), `set-wallpaper.sh`, lock screen, on-screen volume/brightness display, workspace layout save/restore, scratchpad terminal, focus-border pulse, Obsidian theme CSS |
+| `rice/` | The glue: `toggle-theme.sh` (cycles bw → invert → catppuccin across everything), `set-wallpaper.sh`, lock screen, on-screen volume/brightness display, workspace layout save/restore, scratchpad terminal, focus-border pulse, `gammastep-prompt.sh` (dusk notification asking whether to turn on warm colors, fired by the `gammastep-prompt` systemd --user timer below), Obsidian theme CSS |
+| `systemd/user/` | `gammastep-prompt.timer` fires at 19:00 daily, running `gammastep-prompt.service` → `rice/gammastep-prompt.sh` |
 | `wallpapers/` | Images `set-wallpaper.sh` picks from at random — `wallpaper/` for the catppuccin theme, `wallpaper-bw/` for bw/invert |
 
 ## Not included / external

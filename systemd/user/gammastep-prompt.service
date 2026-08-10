@@ -1,0 +1,6 @@
+[Unit]
+Description=Prompt to enable gammastep for the evening
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/rice/gammastep-prompt.sh

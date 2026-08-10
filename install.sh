@@ -60,6 +60,12 @@ mkdir -p "$HOME/Downloads"
 link "$REPO_DIR/wallpapers/wallpaper"    "$HOME/Downloads/wallpaper"
 link "$REPO_DIR/wallpapers/wallpaper-bw" "$HOME/Downloads/wallpaper-bw"
 
+mkdir -p "$HOME/.config/systemd/user"
+link "$REPO_DIR/systemd/user/gammastep-prompt.service" "$HOME/.config/systemd/user/gammastep-prompt.service"
+link "$REPO_DIR/systemd/user/gammastep-prompt.timer"   "$HOME/.config/systemd/user/gammastep-prompt.timer"
+systemctl --user daemon-reload
+systemctl --user enable --now gammastep-prompt.timer
+
 echo
 echo "Done. Log out and back into i3 (or run: ~/.config/rice/toggle-theme.sh"
 echo "twice to force everything to reload) to pick everything up."

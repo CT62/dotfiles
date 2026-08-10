@@ -39,12 +39,15 @@ exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/rice/lock.sh
 # and nm-applet is a desktop environment-independent system tray GUI for it.
 exec --no-startup-id nm-applet
 
-# Briefly pulse the focused window's border wider on focus change
-exec --no-startup-id python3 ~/.config/rice/border-pulse.py
+# Auto-pick split direction by container aspect ratio (Hyprland dwindle-style
+# layout: 3 windows become 1 tall master + 2 stacked, not 3 columns)
+# Disabled until rice/auto-split.py exists — re-enable this line once it's written.
+# exec_always --no-startup-id "pkill -f rice/auto-split.py; python3 ~/.config/rice/auto-split.py"
 
-# Warmer color temperature in the evening (fixed dawn/dusk window, see
-# ~/.config/gammastep/config.ini — no geolocation needed)
-exec --no-startup-id gammastep
+# Warmer color temperature in the evening — no longer auto-started here.
+# A systemd --user timer (gammastep-prompt.timer) prompts at dusk instead
+# of just switching it on; see ~/.config/rice/gammastep-prompt.sh and
+# ~/.config/gammastep/config.ini for the dusk-time window.
 
 # Headless clipboard history server for the $mod+Shift+v rofi picker
 exec --no-startup-id copyq --start-server
