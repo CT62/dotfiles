@@ -1,0 +1,25 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "none",
+    "current_border_width": 2,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 1028,
+       "width": 946,
+       "x": 0,
+       "y": 0
+    },
+    "marks": [],
+    "name": "⠂ Add white border to active window",
+    "percent": 1,
+    "swallows": [
+       {
+       "class": "^kitty$",
+       "instance": "^kitty$",
+       // "machine": "^fedora$",
+       // "title": "^\\⠂\\ Add\\ white\\ border\\ to\\ active\\ window$"
+       }
+    ],
+    "type": "con"
+}
+

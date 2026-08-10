@@ -1,0 +1,48 @@
+/* Rice: catppuccin (Mocha) — generated to match ~/.config/i3/theme-catppuccin.conf */
+
+.theme-dark, .theme-light {
+  --background-primary: #1e1e2e;
+  --background-primary-alt: #181825;
+  --background-secondary: #181825;
+  --background-secondary-alt: #11111b;
+  --background-modifier-border: #313244;
+  --background-modifier-border-hover: #45475a;
+  --background-modifier-form-field: #181825;
+  --background-modifier-hover: rgba(205, 214, 244, 0.06);
+  --background-modifier-active-hover: rgba(205, 214, 244, 0.1);
+  --background-modifier-box-shadow: rgba(17, 17, 27, 0.6);
+
+  --text-normal: #cdd6f4;
+  --text-muted: #a6adc8;
+  --text-faint: #6c7086;
+  --text-on-accent: #11111b;
+  --text-error: #f38ba8;
+  --text-selection: rgba(203, 166, 247, 0.25);
+  --text-accent: #cba6f7;
+  --text-accent-hover: #f5c2e7;
+
+  --interactive-normal: #313244;
+  --interactive-hover: #45475a;
+  --interactive-accent: #cba6f7;
+  --interactive-accent-hover: #f5c2e7;
+  --interactive-success: #a6e3a1;
+
+  --divider-color: #313244;
+  --scrollbar-thumb-bg: #45475a;
+  --scrollbar-active-thumb-bg: #585b70;
+
+  --titlebar-background: #1e1e2e;
+  --titlebar-background-focused: #1e1e2e;
+
+  --code-normal: #cdd6f4;
+  --code-background: #181825;
+  --blockquote-border-color: #45475a;
+
+  --tag-color: #11111b;
+  --tag-background: #cba6f7;
+  --checkbox-color: #cba6f7;
+  --bold-color: #f5c2e7;
+  --italic-color: #a6adc8;
+  --link-color: #89b4fa;
+  --link-color-hover: #b4befe;
+}

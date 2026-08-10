@@ -1,0 +1,48 @@
+/* Rice: bw (monochrome) — generated to match ~/.config/i3/theme-bw.conf */
+
+.theme-dark, .theme-light {
+  --background-primary: #000000;
+  --background-primary-alt: #000000;
+  --background-secondary: #111111;
+  --background-secondary-alt: #0a0a0a;
+  --background-modifier-border: #333333;
+  --background-modifier-border-hover: #555555;
+  --background-modifier-form-field: #000000;
+  --background-modifier-hover: rgba(255, 255, 255, 0.06);
+  --background-modifier-active-hover: rgba(255, 255, 255, 0.1);
+  --background-modifier-box-shadow: rgba(0, 0, 0, 0.6);
+
+  --text-normal: #ffffff;
+  --text-muted: #aaaaaa;
+  --text-faint: #555555;
+  --text-on-accent: #000000;
+  --text-error: #ffffff;
+  --text-selection: rgba(255, 255, 255, 0.25);
+  --text-accent: #ffffff;
+  --text-accent-hover: #cccccc;
+
+  --interactive-normal: #111111;
+  --interactive-hover: #222222;
+  --interactive-accent: #ffffff;
+  --interactive-accent-hover: #cccccc;
+  --interactive-success: #ffffff;
+
+  --divider-color: #333333;
+  --scrollbar-thumb-bg: #333333;
+  --scrollbar-active-thumb-bg: #555555;
+
+  --titlebar-background: #000000;
+  --titlebar-background-focused: #000000;
+
+  --code-normal: #ffffff;
+  --code-background: #111111;
+  --blockquote-border-color: #555555;
+
+  --tag-color: #000000;
+  --tag-background: #ffffff;
+  --checkbox-color: #ffffff;
+  --bold-color: #ffffff;
+  --italic-color: #cccccc;
+  --link-color: #ffffff;
+  --link-color-hover: #aaaaaa;
+}

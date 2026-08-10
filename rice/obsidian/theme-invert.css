@@ -1,0 +1,48 @@
+/* Rice: invert (softened light) — generated to match ~/.config/i3/theme-invert.conf */
+
+.theme-dark, .theme-light {
+  --background-primary: #e9e9e6;
+  --background-primary-alt: #e9e9e6;
+  --background-secondary: #dadad6;
+  --background-secondary-alt: #dadad6;
+  --background-modifier-border: #bebeb8;
+  --background-modifier-border-hover: #9a9a94;
+  --background-modifier-form-field: #e9e9e6;
+  --background-modifier-hover: rgba(22, 22, 22, 0.06);
+  --background-modifier-active-hover: rgba(22, 22, 22, 0.1);
+  --background-modifier-box-shadow: rgba(22, 22, 22, 0.15);
+
+  --text-normal: #161616;
+  --text-muted: #5e5e58;
+  --text-faint: #9a9a94;
+  --text-on-accent: #e9e9e6;
+  --text-error: #9c3b32;
+  --text-selection: rgba(22, 22, 22, 0.15);
+  --text-accent: #2b5480;
+  --text-accent-hover: #3b6ea0;
+
+  --interactive-normal: #dadad6;
+  --interactive-hover: #cfcfc9;
+  --interactive-accent: #2b5480;
+  --interactive-accent-hover: #3b6ea0;
+  --interactive-success: #3c6b34;
+
+  --divider-color: #bebeb8;
+  --scrollbar-thumb-bg: #bebeb8;
+  --scrollbar-active-thumb-bg: #9a9a94;
+
+  --titlebar-background: #e9e9e6;
+  --titlebar-background-focused: #e9e9e6;
+
+  --code-normal: #161616;
+  --code-background: #dadad6;
+  --blockquote-border-color: #9a9a94;
+
+  --tag-color: #e9e9e6;
+  --tag-background: #2b5480;
+  --checkbox-color: #2b5480;
+  --bold-color: #161616;
+  --italic-color: #5e5e58;
+  --link-color: #2b5480;
+  --link-color-hover: #3b6ea0;
+}

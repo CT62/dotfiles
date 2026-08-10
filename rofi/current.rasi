@@ -1,0 +1,75 @@
+/* Catppuccin Mocha rofi theme */
+
+* {
+    bg:     #1e1e2e;
+    fg:     #cdd6f4;
+    dim:    #a6adc8;
+    sel-bg: #cba6f7;
+    sel-fg: #11111b;
+
+    background-color: @bg;
+    text-color:        @fg;
+    font: "Cascadia Mono NF 11";
+}
+
+window {
+    width: 32%;
+    background-color: @bg;
+    border: 2px;
+    border-color: @sel-bg;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+mainbox {
+    background-color: @bg;
+    children: [ inputbar, listview ];
+    spacing: 10px;
+}
+
+inputbar {
+    background-color: @bg;
+    text-color: @fg;
+    border: 0 0 1px 0;
+    border-color: @dim;
+    padding: 6px 2px;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    background-color: @bg;
+    text-color: @fg;
+    padding: 0 8px 0 0;
+}
+
+entry {
+    background-color: @bg;
+    text-color: @fg;
+    placeholder: "search";
+    placeholder-color: @dim;
+}
+
+listview {
+    background-color: @bg;
+    lines: 8;
+    spacing: 4px;
+    cycle: true;
+    dynamic: true;
+}
+
+element {
+    background-color: @bg;
+    text-color: @fg;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+element selected {
+    background-color: @sel-bg;
+    text-color: @sel-fg;
+}
+
+element-text {
+    background-color: inherit;
+    text-color: inherit;
+}
