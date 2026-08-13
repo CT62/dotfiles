@@ -1,8 +1,9 @@
 # dotfiles
 
-My full i3 rice: window manager, bars, terminal, browser, notifications,
-launcher, compositor, lock screen, and wallpapers — three swappable themes
-(bw / invert / catppuccin) that toggle together across all of it.
+My full i3 rice: window manager, bars, terminal, browser, editor, notifications,
+launcher, compositor, lock screen, login screen, GTK/Qt app theming, and
+wallpapers — three swappable themes (bw / invert / catppuccin) that toggle
+together across all of it.
 
 ![Rice screenshot](screenshots/rice.png)
 ![Rice screenshot](screenshots/rice-2.png)
@@ -40,6 +41,12 @@ After installing, log out and back into i3, or run
 | `rice/` | The glue: `toggle-theme.sh` (cycles bw → invert → catppuccin across everything), `set-wallpaper.sh`, lock screen, on-screen volume/brightness display, workspace layout save/restore, scratchpad terminal, focus-border pulse, `gammastep-prompt.sh` (dusk notification asking whether to turn on warm colors, fired by the `gammastep-prompt` systemd --user timer below), Obsidian theme CSS |
 | `systemd/user/` | `gammastep-prompt.timer` fires at 19:00 daily, running `gammastep-prompt.service` → `rice/gammastep-prompt.sh` |
 | `wallpapers/` | Images `set-wallpaper.sh` picks from at random — `wallpaper/` for the catppuccin theme, `wallpaper-bw/` for bw/invert |
+| `lightdm/` | Login screen greeter config — background is generated at install time from `wallpapers/wallpaper-bw` via the same grayscale/blur/dim treatment `rice/lock.sh` uses, so login and lock screen match. `install.sh` also switches the system's display manager to lightdm if it isn't already |
+| `gtk-3.0/`, `gtk-4.0/` | GTK app theming: dark Adwaita, Adwaita icons/cursor, Cascadia Mono NF |
+| `qt5ct/`, `qt6ct/` | Qt app theming: Fusion style, custom `bw` color scheme, same font. Only takes effect because of the `QT_QPA_PLATFORMTHEME` env var set in `x11/` below |
+| `x11/` | `.xprofile` (sets `QT_QPA_PLATFORMTHEME=qt5ct`) and an `environment.d` drop-in that sets the same var a second way, for apps that read one but not the other |
+| `vim/`, `nvim/` | Shared, rice-reactive colorscheme (reads `rice/theme`, same as everything else) — `nvim/init.vim` just sources `vim/vimrc` so vim and nvim look identical |
+| `bash/bashrc.d/` | `aliases.sh` (`vim` → `nvim`) and `git-title.sh` (shows dir + git branch in the kitty tab title) |
 
 ## Not included / external
 

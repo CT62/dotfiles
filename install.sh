@@ -9,16 +9,20 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES=(
   # window manager / bar / launcher / notifications
   i3 polybar rofi dunst
-  # terminal / browser
-  kitty qutebrowser
+  # terminal / browser / editor
+  kitty qutebrowser neovim
   # compositor / color temp / wallpaper
   picom gammastep hsetroot
   # screenshots / lock screen
   maim flameshot ImageMagick i3lock
-  # media / audio / bluetooth / clipboard / brightness
-  playerctl pulseaudio-utils bluez copyq brightnessctl
+  # media / audio / bluetooth / clipboard / brightness / volume tray icon
+  playerctl pulseaudio-utils bluez copyq brightnessctl volumeicon
   # session glue used by i3's exec lines
   dex-autostart xss-lock network-manager-applet libnotify
+  # login screen (see lightdm/ below)
+  lightdm lightdm-gtk-greeter
+  # GTK/Qt app theming consistency (see gtk-3.0/, gtk-4.0/, qt5ct/, qt6ct/)
+  qt5ct qt6ct
   # scripting deps
   jq python3-i3ipc
   # font used across every module (bars, i3, kitty, qutebrowser)
@@ -33,6 +37,14 @@ if command -v dnf >/dev/null 2>&1; then
 else
   echo "dnf not found — this installer targets Fedora."
   echo "Install these manually for your distro: ${PACKAGES[*]}"
+fi
+
+# Fedora spins can default to gdm/sddm instead — this rice expects lightdm
+# (see lightdm/ below for its themed greeter).
+if command -v systemctl >/dev/null 2>&1 && [ -f /usr/lib/systemd/system/lightdm.service ]; then
+  echo "Setting lightdm as the display manager..."
+  sudo systemctl disable gdm.service sddm.service 2>/dev/null || true
+  sudo systemctl enable lightdm.service
 fi
 
 link() {
@@ -58,6 +70,50 @@ link "$REPO_DIR/picom"       "$HOME/.config/picom"
 link "$REPO_DIR/gammastep"   "$HOME/.config/gammastep"
 link "$REPO_DIR/flameshot"   "$HOME/.config/flameshot"
 link "$REPO_DIR/fastfetch"   "$HOME/.config/fastfetch"
+
+# GTK3/GTK4 app theming (dark Adwaita + Cascadia Mono NF), Qt app theming
+# (qt5ct/qt6ct, Fusion style + bw color scheme) and the QT_QPA_PLATFORMTHEME
+# env var that makes Qt apps actually pick qt5ct up.
+mkdir -p "$HOME/.config/gtk-3.0" "$HOME/.config/gtk-4.0" "$HOME/.config/environment.d"
+link "$REPO_DIR/gtk-3.0/settings.ini" "$HOME/.config/gtk-3.0/settings.ini"
+link "$REPO_DIR/gtk-4.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
+link "$REPO_DIR/qt5ct"       "$HOME/.config/qt5ct"
+link "$REPO_DIR/qt6ct"       "$HOME/.config/qt6ct"
+link "$REPO_DIR/x11/xprofile" "$HOME/.xprofile"
+link "$REPO_DIR/x11/environment.d-qt-theme.conf" "$HOME/.config/environment.d/qt-theme.conf"
+
+# vim and nvim share the same rice-reactive colorscheme (see vim/vimrc);
+# nvim/init.vim just sources ~/.vimrc so both look identical.
+mkdir -p "$HOME/.vim" "$HOME/.config/nvim"
+link "$REPO_DIR/vim/vimrc"   "$HOME/.vimrc"
+link "$REPO_DIR/vim/colors"  "$HOME/.vim/colors"
+link "$REPO_DIR/nvim/init.vim" "$HOME/.config/nvim/init.vim"
+
+# Shell aliases (vim -> nvim) and the git-branch-in-kitty-tab-title hook.
+# Appended via symlinked files, not the whole ~/.bashrc.d dir, so anything
+# else Fedora or another tool drops in there later is left alone.
+mkdir -p "$HOME/.bashrc.d"
+link "$REPO_DIR/bash/bashrc.d/aliases.sh"   "$HOME/.bashrc.d/aliases.sh"
+link "$REPO_DIR/bash/bashrc.d/git-title.sh" "$HOME/.bashrc.d/git-title.sh"
+
+# Login screen: themed to match rice/lock.sh's blurred/desaturated look.
+# Needs sudo since it writes under /etc and /usr/share — done here instead
+# of via link() so a non-Fedora/non-lightdm system can skip it cleanly.
+if command -v convert >/dev/null 2>&1 && [ -d /etc/lightdm ]; then
+  echo "Setting up themed lightdm greeter..."
+  GREETER_CONF=/etc/lightdm/lightdm-gtk-greeter.conf
+  GREETER_BG=/usr/share/backgrounds/lockscreen-greeter-bw.png
+  if [ -f "$GREETER_CONF" ] && [ ! -L "$GREETER_CONF" ]; then
+    sudo cp "$GREETER_CONF" "$GREETER_CONF.bak.$(date +%s)"
+  fi
+  SRC_WALLPAPER="$REPO_DIR/wallpapers/wallpaper-bw/night-field-walker.jpg"
+  TMP_BG=$(mktemp --suffix=.png)
+  convert "$SRC_WALLPAPER" -colorspace Gray -blur 0x8 -modulate 35 "$TMP_BG"
+  sudo install -m 644 "$TMP_BG" "$GREETER_BG"
+  rm -f "$TMP_BG"
+  sudo install -m 644 "$REPO_DIR/lightdm/lightdm-gtk-greeter.conf" "$GREETER_CONF"
+  echo "Greeter themed. Takes effect next login/reboot."
+fi
 
 # pokemon-colorscripts isn't packaged for Fedora — clone it straight from
 # its repo and symlink the entrypoint into ~/.local/bin. fastfetch/run.sh
@@ -98,6 +154,10 @@ echo "Not installed by this script (install/configure separately if you use them
 echo "  - google-chrome-stable (not in Fedora repos; used by rice/chrome-launch.sh)"
 echo "  - spicetify, for Spotify theming (used by rice/toggle-theme.sh if present)"
 echo "  - Obsidian, if you want the rice/obsidian/*.css theme"
+echo
+echo "Note: volumeicon is installed and i3/config has a for_window rule for it,"
+echo "but nothing here autostarts it — start it manually, or add an exec line"
+echo "to i3/config if you want it launched on login."
 echo
 echo "Note: rice/toggle-theme.sh hardcodes an Obsidian vault path"
 echo "(/home/clive/code/course/comp sci) — edit that line to your own vault, or"

@@ -1,0 +1,62 @@
+set nocompatible
+syntax on
+filetype plugin indent on
+
+set termguicolors
+
+" Follow the rice's active theme (bw / invert / catppuccin).
+" Re-checks the theme file on focus and on idle (piggybacking on
+" 'updatetime') so toggling with $mod+Shift+t syncs vim automatically,
+" without reloading the colorscheme when nothing changed. :RiceTheme
+" forces a re-check on demand.
+let s:rice_last_theme = ''
+function! s:RiceColorscheme(...)
+  let l:theme_file = expand('~/.config/rice/theme')
+  let l:theme = 'bw'
+  if filereadable(l:theme_file)
+    let l:theme = trim(join(readfile(l:theme_file)))
+  endif
+  if index(['invert', 'catppuccin'], l:theme) < 0
+    let l:theme = 'bw'
+  endif
+  if l:theme !=# s:rice_last_theme || a:0 > 0
+    execute 'colorscheme ' . l:theme
+    let s:rice_last_theme = l:theme
+  endif
+endfunction
+command! RiceTheme call s:RiceColorscheme(1)
+call s:RiceColorscheme(1)
+augroup RiceTheme
+  autocmd!
+  autocmd FocusGained,CursorHold,CursorHoldI * call s:RiceColorscheme()
+augroup END
+
+set number
+set relativenumber
+set cursorline
+set signcolumn=yes
+set scrolloff=6
+set laststatus=2
+set noshowmode
+set list
+set listchars=tab:\ \ ,trail:.
+
+set tabstop=4
+set shiftwidth=4
+set expandtab
+set smartindent
+
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+
+set mouse=a
+set clipboard=unnamedplus
+set updatetime=300
+set hidden
+set splitright
+set splitbelow
+
+nnoremap <silent> <leader>h :nohlsearch<CR>
+let mapleader = " "
