@@ -137,8 +137,9 @@ if ! grep -qF "$BASHRC_MARKER" "$HOME/.bashrc" 2>/dev/null; then
 fi
 
 mkdir -p "$HOME/Downloads"
-link "$REPO_DIR/wallpapers/wallpaper"    "$HOME/Downloads/wallpaper"
-link "$REPO_DIR/wallpapers/wallpaper-bw" "$HOME/Downloads/wallpaper-bw"
+link "$REPO_DIR/wallpapers/wallpaper"        "$HOME/Downloads/wallpaper"
+link "$REPO_DIR/wallpapers/wallpaper-bw"     "$HOME/Downloads/wallpaper-bw"
+link "$REPO_DIR/wallpapers/wallpaper-invert" "$HOME/Downloads/wallpaper-invert"
 
 mkdir -p "$HOME/.config/systemd/user"
 link "$REPO_DIR/systemd/user/gammastep-prompt.service" "$HOME/.config/systemd/user/gammastep-prompt.service"
