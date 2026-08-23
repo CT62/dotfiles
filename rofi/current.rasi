@@ -1,11 +1,12 @@
-/* Catppuccin Mocha rofi theme */
+/* Black & white rofi theme */
 
 * {
-    bg:     #1e1e2e;
-    fg:     #cdd6f4;
-    dim:    #a6adc8;
-    sel-bg: #cba6f7;
-    sel-fg: #11111b;
+    bg:      #000000;
+    bg-alt:  #0d0d0d;
+    fg:      #FFFFFF;
+    dim:     #6E6E6E;
+    sel-bg:  #FFFFFF;
+    sel-fg:  #000000;
 
     background-color: @bg;
     text-color:        @fg;
@@ -13,37 +14,38 @@
 }
 
 window {
-    width: 32%;
+    width: 34%;
     background-color: @bg;
-    border: 2px;
-    border-color: @sel-bg;
+    border: 1px;
+    border-color: @dim;
     border-radius: 6px;
-    padding: 10px;
+    padding: 16px;
 }
 
 mainbox {
     background-color: @bg;
-    children: [ inputbar, listview ];
-    spacing: 10px;
+    children: [ inputbar, message, listview ];
+    spacing: 14px;
 }
 
 inputbar {
-    background-color: @bg;
+    background-color: @bg-alt;
     text-color: @fg;
-    border: 0 0 1px 0;
-    border-color: @dim;
-    padding: 6px 2px;
+    border: 1px;
+    border-color: #1f1f1f;
+    border-radius: 8px;
+    padding: 9px 12px;
     children: [ prompt, entry ];
 }
 
 prompt {
-    background-color: @bg;
-    text-color: @fg;
+    background-color: inherit;
+    text-color: @dim;
     padding: 0 8px 0 0;
 }
 
 entry {
-    background-color: @bg;
+    background-color: inherit;
     text-color: @fg;
     placeholder: "search";
     placeholder-color: @dim;
@@ -55,13 +57,30 @@ listview {
     spacing: 4px;
     cycle: true;
     dynamic: true;
+    scrollbar: true;
+}
+
+scrollbar {
+    background-color: @bg-alt;
+    handle-color: @dim;
+    handle-width: 4px;
+    border-radius: 4px;
 }
 
 element {
     background-color: @bg;
     text-color: @fg;
-    padding: 6px 8px;
-    border-radius: 4px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    orientation: horizontal;
+    children: [ element-icon, element-text ];
+    spacing: 10px;
+}
+
+element-icon {
+    size: 1.15em;
+    vertical-align: 0.5;
+    background-color: inherit;
 }
 
 element selected {
@@ -72,4 +91,25 @@ element selected {
 element-text {
     background-color: inherit;
     text-color: inherit;
+    vertical-align: 0.5;
+}
+
+message {
+    background-color: @bg-alt;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 0 0 4px 0;
+}
+
+textbox {
+    text-color: @fg;
+}
+
+error-message {
+    background-color: @bg-alt;
+    text-color: @fg;
+    border: 1px;
+    border-color: @dim;
+    border-radius: 8px;
+    padding: 10px;
 }

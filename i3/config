@@ -15,6 +15,9 @@ set $mod Mod4
 # is used in the bar {} block below.
 font pango:Cascadia Mono NF 9
 
+# Monitor layout: DVI-D-1 landscape/primary (1), HDMI-1 portrait (2)
+exec_always --no-startup-id ~/.config/rice/set-monitors.sh
+
 # Set wallpaper according to whichever theme (bw/invert) was last selected
 exec --no-startup-id ~/.config/rice/set-wallpaper.sh
 
@@ -35,9 +38,12 @@ exec --no-startup-id dex-autostart --autostart --environment i3
 # screen before suspend. Use loginctl lock-session to lock your screen.
 exec --no-startup-id xss-lock --transfer-sleep-lock -- ~/.config/rice/lock.sh
 
-# NetworkManager is the most popular way to manage wireless networks on Linux,
-# and nm-applet is a desktop environment-independent system tray GUI for it.
-exec --no-startup-id nm-applet
+# 5 minutes idle triggers the X screensaver, which xss-lock (above) is
+# already listening for and turns into an automatic lock.
+exec_always --no-startup-id xset s 300 300
+
+# No wifi hardware on this box (ethernet only) and the bar's network module
+# already shows connection status, so nm-applet's tray icon isn't needed.
 
 # Auto-pick split direction by container aspect ratio (Hyprland dwindle-style
 # layout: 3 windows become 1 tall master + 2 stacked, not 3 columns)
@@ -100,6 +106,9 @@ bindsym $mod+Shift+v exec --no-startup-id "rofi -show clipboard -modi clipboard:
 
 # rofi power menu (lock/suspend/reboot/shutdown) — also on the polybar button
 bindsym $mod+Shift+p exec --no-startup-id ~/.config/polybar/powermenu.sh
+
+# rofi bluetooth device picker — also on the polybar bluetooth module (left-click)
+bindsym $mod+Shift+b exec --no-startup-id "rofi -show bluetooth -modi bluetooth:~/.config/rofi/bluetooth.sh -theme ~/.config/rofi/current.rasi"
 
 # toggle between black/white and inverted themes
 bindsym $mod+Shift+t exec --no-startup-id ~/.config/rice/toggle-theme.sh
@@ -182,6 +191,9 @@ set $ws7 "7"
 set $ws8 "8"
 set $ws9 "9"
 set $ws10 "10"
+
+# Pin workspace 2 to the right (portrait) monitor by default
+workspace $ws2 output HDMI-1
 
 # switch to workspace
 bindsym $mod+1 workspace number $ws1
