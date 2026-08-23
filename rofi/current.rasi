@@ -1,12 +1,12 @@
-/* Inverted (snowy field) rofi theme, softened for readability */
+/* Black & white rofi theme */
 
 * {
-    bg:      #E9E9E6;
-    bg-alt:  #DFDFDA;
-    fg:      #161616;
-    dim:     #5E5E58;
-    sel-bg:  #161616;
-    sel-fg:  #E9E9E6;
+    bg:      #000000;
+    bg-alt:  #0d0d0d;
+    fg:      #FFFFFF;
+    dim:     #6E6E6E;
+    sel-bg:  #FFFFFF;
+    sel-fg:  #000000;
 
     background-color: @bg;
     text-color:        @fg;
@@ -32,7 +32,7 @@ inputbar {
     background-color: @bg-alt;
     text-color: @fg;
     border: 1px;
-    border-color: #CFCFC9;
+    border-color: #1f1f1f;
     border-radius: 8px;
     padding: 9px 12px;
     children: [ prompt, entry ];
