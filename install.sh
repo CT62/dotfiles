@@ -16,7 +16,7 @@ PACKAGES=(
   # screenshots / lock screen
   maim flameshot ImageMagick i3lock
   # media / audio / bluetooth / clipboard / brightness / volume tray icon
-  playerctl pulseaudio-utils bluez copyq brightnessctl volumeicon
+  playerctl pulseaudio-utils bluez copyq xclip brightnessctl volumeicon
   # session glue used by i3's exec lines
   dex-autostart xss-lock network-manager-applet libnotify
   # login screen (see lightdm/ below)
