@@ -1,18 +1,36 @@
 #!/usr/bin/env bash
 # Cycles the whole rice through bw -> invert -> catppuccin -> bw,
-# swapping i3, polybar, kitty, dunst, rofi, qutebrowser and the wallpaper together.
+# swapping i3, polybar, kitty, dunst, rofi, qutebrowser and the
+# wallpaper together. Pass a theme name to jump straight to it instead
+# (that's what rice/theme-picker.sh does).
 set -euo pipefail
+
+# One switch at a time — mashing the key would otherwise interleave two
+# runs reading/writing the theme file and restarting picom/polybar.
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/rice-theme.lock"
+flock 9
+# Long-lived children below (polybar, qutebrowser, spicetify) get fd 9
+# closed so they don't inherit the lock and block the next switch.
 
 RICE=~/.config/rice
 STATE_FILE="$RICE/theme"
 CURRENT=$(cat "$STATE_FILE" 2>/dev/null || echo bw)
+THEMES=(bw invert catppuccin)
 
-case "$CURRENT" in
-  bw)          NEW=invert ;;
-  invert)      NEW=catppuccin ;;
-  catppuccin)  NEW=bw ;;
-  *)           NEW=bw ;;
-esac
+if [ $# -gt 0 ]; then
+  NEW="$1"
+  if [[ ! " ${THEMES[*]} " == *" $NEW "* ]]; then
+    echo "unknown theme: $NEW (have: ${THEMES[*]})" >&2
+    exit 1
+  fi
+else
+  NEW=${THEMES[0]}
+  for i in "${!THEMES[@]}"; do
+    if [ "${THEMES[$i]}" = "$CURRENT" ]; then
+      NEW=${THEMES[$(( (i + 1) % ${#THEMES[@]} ))]}
+    fi
+  done
+fi
 echo "$NEW" > "$STATE_FILE"
 
 cp ~/.config/i3/theme-$NEW.conf ~/.config/i3/theme.conf
@@ -32,7 +50,7 @@ fi
 ~/.config/rice/set-wallpaper.sh
 
 i3-msg reload >/dev/null
-~/.config/polybar/launch.sh
+~/.config/polybar/launch.sh 9>&-
 
 # kitty's listen_on auto-suffixes the socket with each process's own pid
 # (e.g. @mykitty-12345), so there's no single @mykitty socket to talk to —
@@ -45,7 +63,7 @@ done
 # form with no running instance just launches a brand new window instead
 # of reaching an existing one over IPC.
 if pgrep -x qutebrowser >/dev/null 2>&1; then
-  qutebrowser ":config-source" >/dev/null 2>&1 &
+  qutebrowser ":config-source" >/dev/null 2>&1 9>&- &
   disown 2>/dev/null || true
 fi
 
@@ -57,7 +75,7 @@ fi
   if flatpak ps 2>/dev/null | grep -q com.spotify.Client; then
     notify-send -a "rice" "Spotify theme" "Updated — restart Spotify to see it" 2>/dev/null || true
   fi
-) &
+) 9>&- &
 disown 2>/dev/null || true
 
 if pgrep -x chrome >/dev/null 2>&1 || pgrep -f "google-chrome-stable" >/dev/null 2>&1; then

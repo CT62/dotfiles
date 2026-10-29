@@ -6,4 +6,5 @@ case "$THEME" in
   invert)      wp=$(find -L ~/Downloads/wallpaper-invert -maxdepth 1 -type f | shuf -n 1) ;;
   *)           wp=$(find -L ~/Downloads/wallpaper-bw -maxdepth 1 -type f | shuf -n 1) ;;
 esac
-[ -n "$wp" ] && feh --bg-fill "$wp" "$wp" || true
+[ -n "$wp" ] || exit 0
+feh --bg-fill "$wp" "$wp" || true

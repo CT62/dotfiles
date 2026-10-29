@@ -1,8 +1,106 @@
+" Shared by vim and nvim (nvim/init.vim sources this, then loads the
+" nvim-only look from nvim/lua/rice.lua). No plugin manager: the
+" statusline, buffer tabline and start screen below are all built in, and
+" purely cosmetic — no extra keybindings.
+let g:rice_start = reltime()
+
 set nocompatible
 syntax on
 filetype plugin indent on
 
 set termguicolors
+
+" ── Rice palettes ────────────────────────────────────────────────────────
+" Extra highlight groups (statusline pills, buffer tabs, dashboard
+" gradient, floats) layered on top of whichever colors/*.vim is active,
+" re-applied on every :colorscheme so theme switches carry them along.
+let s:palettes = {
+  \ 'bw': {
+  \   'bg': '#000000', 'panel': '#141414', 'panel2': '#262626',
+  \   'fg': '#E4E4E4', 'dim': '#7A7A7A', 'accent': '#FFFFFF', 'accent_fg': '#000000',
+  \   'n': '#FFFFFF', 'i': '#BDBDBD', 'v': '#9A9A9A', 'r': '#FFFFFF', 'c': '#D6D6D6', 't': '#BDBDBD',
+  \   'grad': ['#FFFFFF', '#E3E3E3', '#C7C7C7', '#ABABAB', '#8F8F8F', '#737373'],
+  \   'error': '#FFFFFF', 'warn': '#BDBDBD', 'info': '#8A8A8A', 'hint': '#8A8A8A', 'mod': '#FFFFFF'},
+  \ 'invert': {
+  \   'bg': '#FFFFFF', 'panel': '#ECECEC', 'panel2': '#D6D6D6',
+  \   'fg': '#1B1B1B', 'dim': '#757575', 'accent': '#1B1B1B', 'accent_fg': '#FFFFFF',
+  \   'n': '#1B1B1B', 'i': '#3E3E3E', 'v': '#5E5E5E', 'r': '#1B1B1B', 'c': '#2E2E2E', 't': '#3E3E3E',
+  \   'grad': ['#1B1B1B', '#2F2F2F', '#444444', '#585858', '#6D6D6D', '#828282'],
+  \   'error': '#1B1B1B', 'warn': '#3E3E3E', 'info': '#5E5E5E', 'hint': '#757575', 'mod': '#1B1B1B'},
+  \ 'catppuccin': {
+  \   'bg': '#1E1E2E', 'panel': '#181825', 'panel2': '#313244',
+  \   'fg': '#CDD6F4', 'dim': '#7F849C', 'accent': '#CBA6F7', 'accent_fg': '#11111B',
+  \   'n': '#CBA6F7', 'i': '#A6E3A1', 'v': '#FAB387', 'r': '#F38BA8', 'c': '#F9E2AF', 't': '#94E2D5',
+  \   'grad': ['#CBA6F7', '#F5C2E7', '#F38BA8', '#FAB387', '#F9E2AF', '#A6E3A1'],
+  \   'error': '#F38BA8', 'warn': '#F9E2AF', 'info': '#89B4FA', 'hint': '#94E2D5', 'mod': '#FAB387'},
+  \ }
+
+function! s:Hi(group, fg, bg, attr) abort
+  execute printf('hi %s guifg=%s guibg=%s gui=%s cterm=%s', a:group,
+    \ empty(a:fg) ? 'NONE' : a:fg, empty(a:bg) ? 'NONE' : a:bg,
+    \ empty(a:attr) ? 'NONE' : a:attr, empty(a:attr) ? 'NONE' : a:attr)
+endfunction
+
+function! s:RiceHighlights() abort
+  let p = get(s:palettes, get(g:, 'colors_name', 'bw'), s:palettes.bw)
+  let g:rice_palette = p
+
+  " statusline: mode pills (body + rounded caps) on a panel strip
+  for m in ['n', 'i', 'v', 'r', 'c', 't']
+    call s:Hi('RiceMode' . m, p.accent_fg, p[m], 'bold')
+    call s:Hi('RiceModeCap' . m, p[m], p.panel, '')
+  endfor
+  call s:Hi('StatusLine',    p.fg,    p.panel, '')
+  call s:Hi('StatusLineNC',  p.dim,   p.panel, '')
+  call s:Hi('RiceStl',       p.fg,    p.panel, '')
+  call s:Hi('RiceStlDim',    p.dim,   p.panel, '')
+  call s:Hi('RiceStlAccent', p.accent, p.panel, 'bold')
+  call s:Hi('RiceStlMod',    p.mod,   p.panel, 'bold')
+  call s:Hi('RiceStlErr',    p.error, p.panel, 'bold')
+  call s:Hi('RiceStlWarn',   p.warn,  p.panel, 'bold')
+
+  " buffer tabline
+  call s:Hi('TabLineFill',    '',          p.bg,     '')
+  call s:Hi('RiceTab',        p.dim,       p.panel,  '')
+  call s:Hi('RiceTabCap',     p.panel,     p.bg,     '')
+  call s:Hi('RiceTabSel',     p.accent_fg, p.accent, 'bold')
+  call s:Hi('RiceTabSelCap',  p.accent,    p.bg,     '')
+  call s:Hi('RiceTabMod',     p.mod,       p.panel,  'bold')
+
+  " start screen: logo gradient, then text / dim
+  for i in range(len(p.grad))
+    call s:Hi('RiceDash' . (i + 1), p.grad[i], '', 'bold')
+  endfor
+  call s:Hi('RiceDashText', p.fg,     '', '')
+  call s:Hi('RiceDashDim',  p.dim,    '', 'italic')
+
+  " the rest of the UI
+  call s:Hi('CursorLineNr', p.accent, '', 'bold')
+  call s:Hi('WinSeparator', p.panel2, '', '')
+  call s:Hi('VertSplit',    p.panel2, '', '')
+  call s:Hi('NormalFloat',  p.fg,     p.bg, '')
+  call s:Hi('FloatBorder',  p.accent, p.bg, '')
+  call s:Hi('FloatTitle',   p.accent_fg, p.accent, 'bold')
+  call s:Hi('RiceYank',     p.accent_fg, p.accent, '')
+  call s:Hi('Folded',       p.dim,    p.panel, 'italic')
+  call s:Hi('DiagnosticError', p.error, '', '')
+  call s:Hi('DiagnosticWarn',  p.warn,  '', '')
+  call s:Hi('DiagnosticInfo',  p.info,  '', '')
+  call s:Hi('DiagnosticHint',  p.hint,  '', '')
+
+  " nvim's built-in tree-sitter groups carry their own (default theme)
+  " colors after :hi clear — point them back at this theme's groups
+  if has('nvim')
+    hi! link @variable Identifier
+    hi! link @variable.member Identifier
+    hi! link @property Identifier
+  endif
+endfunction
+
+augroup RiceHighlights
+  autocmd!
+  autocmd ColorScheme * call s:RiceHighlights()
+augroup END
 
 " Follow the rice's active theme (bw / invert / catppuccin).
 " Re-checks the theme file on focus and on idle (piggybacking on
@@ -31,6 +129,7 @@ augroup RiceTheme
   autocmd FocusGained,CursorHold,CursorHoldI * call s:RiceColorscheme()
 augroup END
 
+" ── Options ──────────────────────────────────────────────────────────────
 set number
 set relativenumber
 set cursorline
@@ -38,8 +137,15 @@ set signcolumn=yes
 set scrolloff=6
 set laststatus=2
 set noshowmode
+set shortmess+=I
 set list
-set listchars=tab:\ \ ,trail:.
+" cosmetic: nicer glyphs for tabs / trailing space / wrapped lines / folds,
+" no ~ past the end of the buffer, thin split lines
+let &listchars = "tab:\u2192 ,trail:\u00b7,nbsp:\u2423,extends:\u203a,precedes:\u2039"
+let &fillchars = "eob: ,vert:\u2502,fold: ,foldopen:\uf107,foldclose:\uf105,foldsep: "
+let &showbreak = "\u21aa "
+set linebreak breakindent
+set pumheight=12
 
 set tabstop=4
 set shiftwidth=4
@@ -57,6 +163,206 @@ set updatetime=300
 set hidden
 set splitright
 set splitbelow
+
+" Closed folds show their first line plus how many lines are hidden
+function! RiceFoldText() abort
+  let l:line = substitute(getline(v:foldstart), '\t', repeat(' ', &tabstop), 'g')
+  return l:line . '  ' . "\uf141" . ' ' . (v:foldend - v:foldstart + 1) . ' lines '
+endfunction
+set foldtext=RiceFoldText()
+
+" ── File icons (Nerd Font) ───────────────────────────────────────────────
+let s:icons = {
+  \ 'python': "", 'javascript': "", 'typescript': "",
+  \ 'html': "", 'css': "", 'json': "", 'markdown': "",
+  \ 'sh': "", 'bash': "", 'zsh': "", 'vim': "",
+  \ 'c': "", 'cpp': "", 'java': "", 'lua': "",
+  \ 'rust': "", 'go': "", 'sql': "", 'text': "",
+  \ 'gitcommit': "", 'netrw': "", 'help': "\U000f02d6",
+  \ }
+function! RiceIcon(ft) abort
+  return get(s:icons, a:ft, "")
+endfunction
+
+" ── Statusline ───────────────────────────────────────────────────────────
+"  ( NORMAL )  main   app.py ●                 E1 W2  python  12:4  ▅ 63%
+let s:modes = {
+  \ 'n': ['NORMAL', 'n'], 'no': ['PENDING', 'n'], 'i': ['INSERT', 'i'],
+  \ 'v': ['VISUAL', 'v'], 'V': ['V-LINE', 'v'], "\<C-v>": ['V-BLOCK', 'v'],
+  \ 's': ['SELECT', 'v'], 'S': ['S-LINE', 'v'], "\<C-s>": ['S-BLOCK', 'v'],
+  \ 'R': ['REPLACE', 'r'], 'c': ['COMMAND', 'c'], 't': ['TERMINAL', 't'],
+  \ '!': ['SHELL', 'c'], 'r': ['PROMPT', 'c'],
+  \ }
+let s:L = ""
+let s:R = ""
+
+function! s:Pill(group, text) abort
+  return '%#RiceModeCap' . a:group . '#' . s:L . '%#RiceMode' . a:group . '#' . a:text
+    \ . '%#RiceModeCap' . a:group . '#' . s:R
+endfunction
+
+" git branch, cached per buffer (refreshed on enter / write / focus)
+function! s:UpdateBranch() abort
+  let b:rice_branch = ''
+  if !empty(&buftype) || empty(expand('%')) || !executable('git') | return | endif
+  let l:out = systemlist('git -C ' . shellescape(expand('%:p:h')) . ' branch --show-current 2>/dev/null')
+  if v:shell_error == 0 && !empty(l:out)
+    let b:rice_branch = l:out[0]
+  endif
+endfunction
+augroup RiceBranch
+  autocmd!
+  autocmd BufEnter,BufWritePost,FocusGained * call s:UpdateBranch()
+augroup END
+
+function! RiceStatusline() abort
+  if get(g:, 'statusline_winid', win_getid()) != win_getid()
+    return '%#StatusLineNC#   %f %m%=%l:%c   '
+  endif
+  let [l:name, l:grp] = get(s:modes, mode(1), get(s:modes, mode(), ['NORMAL', 'n']))
+  let l:s = ' ' . s:Pill(l:grp, ' ' . l:name . ' ')
+  if &filetype ==# 'ricedash'
+    return l:s . '  %#RiceStlDim#' . "\uf015" . ' dashboard%='
+  endif
+
+  let l:branch = get(b:, 'rice_branch', '')
+  if !empty(l:branch)
+    let l:s .= '  %#RiceStlAccent#' . "" . ' ' . l:branch
+  endif
+  let l:fname = empty(expand('%')) ? '[No Name]' : expand('%:~:.')
+  let l:s .= '  %#RiceStl#' . RiceIcon(&filetype) . ' %<' . substitute(l:fname, '%', '%%', 'g')
+  if &modified | let l:s .= ' %#RiceStlMod#' . "●" | endif
+  if &readonly || !&modifiable | let l:s .= ' %#RiceStlDim#' . "" | endif
+
+  let l:s .= ' %='
+  if has('nvim')
+    let l:e = luaeval('#vim.diagnostic.get(0, {severity = vim.diagnostic.severity.ERROR})')
+    let l:w = luaeval('#vim.diagnostic.get(0, {severity = vim.diagnostic.severity.WARN})')
+    if l:e | let l:s .= '%#RiceStlErr#' . "" . ' ' . l:e . '  ' | endif
+    if l:w | let l:s .= '%#RiceStlWarn#' . "" . ' ' . l:w . '  ' | endif
+  endif
+  if !empty(&filetype) | let l:s .= '%#RiceStlDim#' . &filetype . '  ' | endif
+  let l:s .= '%#RiceStl#' . "" . ' %l:%c  '
+
+  " position as a little fill gauge + percent
+  let l:bars = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
+  let l:pct = line('$') <= 1 ? 100 : (line('.') - 1) * 100 / (line('$') - 1)
+  let l:s .= s:Pill(l:grp, ' ' . l:bars[min([7, l:pct * 8 / 100])] . ' ' . l:pct . '%% ') . ' '
+  return l:s
+endfunction
+set statusline=%!RiceStatusline()
+
+" ── Buffer tabline ───────────────────────────────────────────────────────
+" Open buffers as rounded tabs (current one filled), project dir on the
+" right. Shown once there's more than one buffer.
+
+function! RiceTabline() abort
+  let l:s = ' '
+  for l:b in getbufinfo({'buflisted': 1})
+    let l:name = empty(l:b.name) ? '[No Name]' : fnamemodify(l:b.name, ':t')
+    let l:label = ' ' . RiceIcon(getbufvar(l:b.bufnr, '&filetype')) . ' ' . l:name
+    let l:sel = l:b.bufnr == bufnr('%')
+    let [l:cap, l:body] = l:sel ? ['RiceTabSelCap', 'RiceTabSel'] : ['RiceTabCap', 'RiceTab']
+    let l:s .= '%#' . l:cap . '#' . s:L . '%#' . l:body . '#' . l:label
+    if l:b.changed
+      let l:s .= l:sel ? ' ' . "●" : ' %#RiceTabMod#' . "●"
+    endif
+    let l:s .= ' %#' . l:cap . '#' . s:R . ' '
+  endfor
+  let l:s .= '%#TabLineFill#%=' . s:Pill('n', ' ' . "" . ' ' . fnamemodify(getcwd(), ':t') . ' ') . ' '
+  return l:s
+endfunction
+set tabline=%!RiceTabline()
+
+function! s:UpdateTablineVisibility() abort
+  let &showtabline = len(getbufinfo({'buflisted': 1})) > 1 ? 2 : 0
+endfunction
+augroup RiceTabline
+  autocmd!
+  autocmd VimEnter,BufAdd,BufDelete,BufEnter * call timer_start(0, {-> s:UpdateTablineVisibility()})
+augroup END
+
+" ── Start screen ─────────────────────────────────────────────────────────
+" Opening vim/nvim with no file shows a logo in the theme's gradient. It's
+" just decoration: start typing (i, a, o, ...) and it clears into a normal
+" empty buffer; :e / :find etc. replace it as usual.
+let s:logo = has('nvim') ? [
+  \ '███╗   ██╗██╗   ██╗██╗███╗   ███╗',
+  \ '████╗  ██║██║   ██║██║████╗ ████║',
+  \ '██╔██╗ ██║██║   ██║██║██╔████╔██║',
+  \ '██║╚██╗██║╚██╗ ██╔╝██║██║╚██╔╝██║',
+  \ '██║ ╚████║ ╚████╔╝ ██║██║ ╚═╝ ██║',
+  \ '╚═╝  ╚═══╝  ╚═══╝  ╚═╝╚═╝     ╚═╝',
+  \ ] : [
+  \ '██╗   ██╗██╗███╗   ███╗',
+  \ '██║   ██║██║████╗ ████║',
+  \ '██║   ██║██║██╔████╔██║',
+  \ '╚██╗ ██╔╝██║██║╚██╔╝██║',
+  \ ' ╚████╔╝ ██║██║ ╚═╝ ██║',
+  \ '  ╚═══╝  ╚═╝╚═╝     ╚═╝',
+  \ ]
+
+function! s:DrawDashboard() abort
+  silent %delete _
+  syntax clear
+
+  let l:ms = float2nr(reltimefloat(reltime(g:rice_start)) * 1000)
+  let l:foot = "\uf0e7" . ' ready in ' . l:ms . 'ms   ' . "\uf073" . ' ' . strftime('%A %d %B')
+  let l:Center = {s -> repeat(' ', max([0, (winwidth(0) - strdisplaywidth(s)) / 2])) . s}
+
+  let l:lines = map(copy(s:logo), 'l:Center(v:val)')
+  let l:lines += ['', '', l:Center("\U000f0219" . '  ' . fnamemodify(getcwd(), ':~')), '', l:Center(l:foot)]
+
+  let l:top = max([0, (winheight(0) - len(l:lines)) / 2])
+  call setline(1, repeat([''], l:top) + l:lines)
+
+  for l:i in range(len(s:logo))
+    execute 'syntax match RiceDash' . (l:i + 1) . ' /\%' . (l:top + l:i + 1) . 'l\S.*/'
+  endfor
+  execute 'syntax match RiceDashText /\%' . (l:top + len(s:logo) + 3) . 'l\S.*/'
+  execute 'syntax match RiceDashDim /\%' . (l:top + len(l:lines)) . 'l\S.*/'
+  setlocal nomodified
+  call cursor(1, 1)
+  call winrestview({'topline': 1})
+endfunction
+
+" Typing anything turns the start screen back into a plain empty buffer.
+function! s:LeaveDashboard() abort
+  autocmd! RiceDashboardBuf * <buffer>
+  silent %delete _
+  syntax clear
+  setlocal buftype= bufhidden= buflisted swapfile filetype=
+  setlocal number relativenumber cursorline list signcolumn=yes scrolloff=6
+endfunction
+
+function! s:Dashboard() abort
+  if argc() || line2byte('$') != -1 || get(g:, 'rice_stdin', 0)
+    return
+  endif
+  enew
+  setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nonumber norelativenumber
+  setlocal nocursorline nolist signcolumn=no colorcolumn= foldcolumn=0 nofoldenable scrolloff=0
+  setlocal filetype=ricedash
+  call s:DrawDashboard()
+  augroup RiceDashboardBuf
+    autocmd! * <buffer>
+    autocmd InsertEnter <buffer> call s:LeaveDashboard()
+    autocmd VimResized <buffer> call s:DrawDashboard()
+  augroup END
+endfunction
+
+augroup RiceDashboard
+  autocmd!
+  autocmd StdinReadPre * let g:rice_stdin = 1
+  autocmd VimEnter * nested call s:Dashboard()
+augroup END
+
+" Cursorline only in the focused window
+augroup RiceCursorline
+  autocmd!
+  autocmd WinEnter,BufEnter * if &ft !=# 'ricedash' | setlocal cursorline | endif
+  autocmd WinLeave * setlocal nocursorline
+augroup END
 
 nnoremap <silent> <leader>h :nohlsearch<CR>
 let mapleader = " "

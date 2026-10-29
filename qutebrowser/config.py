@@ -5,7 +5,7 @@ c.url.searchengines = {"DEFAULT": "https://www.google.com/search?q={}"}
 c.url.start_pages = ["https://www.google.com"]
 c.url.default_page = "https://www.google.com"
 
-# Follow the rice's active theme (bw / invert) — same state file
+# Follow the rice's active theme (bw / invert / catppuccin) — same state file
 # ~/.config/rice/toggle-theme.sh writes, reloaded via :config-source.
 import pathlib
 
@@ -14,6 +14,8 @@ _theme = _theme_file.read_text().strip() if _theme_file.exists() else "bw"
 
 if _theme == "invert":
     bg, fg, accent = "#FFFFFF", "#000000", "#000000"
+elif _theme == "catppuccin":
+    bg, fg, accent = "#1E1E2E", "#CDD6F4", "#CBA6F7"
 else:
     bg, fg, accent = "#000000", "#FFFFFF", "#FFFFFF"
 

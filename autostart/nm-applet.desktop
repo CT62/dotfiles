@@ -1,0 +1,8 @@
+[Desktop Entry]
+# Masks the distro's /etc/xdg/autostart/nm-applet.desktop: this box is
+# ethernet-only and the polybar network module already shows the
+# connection, so the tray icon was just clutter.
+Type=Application
+Name=Network
+Exec=nm-applet
+Hidden=true

@@ -1,0 +1,8 @@
+[Desktop Entry]
+# Masks Fedora's /etc/xdg/autostart/volumeicon.desktop (dex reads the
+# per-user copy first): the polybar pulseaudio module already shows volume,
+# so the tray icon was just clutter.
+Type=Application
+Name=Volume Icon
+Exec=volumeicon
+Hidden=true

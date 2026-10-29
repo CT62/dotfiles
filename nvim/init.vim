@@ -4,6 +4,9 @@ set runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
 
+" nvim-only cosmetics (rounded floats, yank flash, diagnostics styling)
+lua require('rice')
+
 " File tree via built-in netrw — no plugin manager needed
 let g:netrw_banner = 0
 let g:netrw_liststyle = 3

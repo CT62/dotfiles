@@ -16,7 +16,7 @@ PACKAGES=(
   # screenshots / lock screen
   maim flameshot ImageMagick i3lock
   # media / audio / bluetooth / clipboard / brightness / volume tray icon
-  playerctl pulseaudio-utils bluez copyq xclip brightnessctl volumeicon
+  playerctl pulseaudio-utils bluez copyq xclip brightnessctl
   # session glue used by i3's exec lines
   dex-autostart xss-lock network-manager-applet libnotify
   # login screen (see lightdm/ below)
@@ -88,6 +88,7 @@ mkdir -p "$HOME/.vim" "$HOME/.config/nvim"
 link "$REPO_DIR/vim/vimrc"   "$HOME/.vimrc"
 link "$REPO_DIR/vim/colors"  "$HOME/.vim/colors"
 link "$REPO_DIR/nvim/init.vim" "$HOME/.config/nvim/init.vim"
+link "$REPO_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
 
 # Shell aliases (vim -> nvim) and the git-branch-in-kitty-tab-title hook.
 # Appended via symlinked files, not the whole ~/.bashrc.d dir, so anything
@@ -141,6 +142,15 @@ link "$REPO_DIR/wallpapers/wallpaper"        "$HOME/Downloads/wallpaper"
 link "$REPO_DIR/wallpapers/wallpaper-bw"     "$HOME/Downloads/wallpaper-bw"
 link "$REPO_DIR/wallpapers/wallpaper-invert" "$HOME/Downloads/wallpaper-invert"
 
+# Mask the distro's volumeicon / nm-applet autostarts (polybar shows volume
+# and network itself, so their tray icons are just clutter)
+mkdir -p "$HOME/.config/autostart"
+link "$REPO_DIR/autostart/volumeicon.desktop" "$HOME/.config/autostart/volumeicon.desktop"
+link "$REPO_DIR/autostart/nm-applet.desktop"  "$HOME/.config/autostart/nm-applet.desktop"
+
+# CopyQ runs headless for the rofi clipboard picker — no tray icon
+copyq config disable_tray true >/dev/null 2>&1 || true
+
 mkdir -p "$HOME/.config/systemd/user"
 link "$REPO_DIR/systemd/user/gammastep-prompt.service" "$HOME/.config/systemd/user/gammastep-prompt.service"
 link "$REPO_DIR/systemd/user/gammastep-prompt.timer"   "$HOME/.config/systemd/user/gammastep-prompt.timer"
@@ -155,10 +165,6 @@ echo "Not installed by this script (install/configure separately if you use them
 echo "  - google-chrome-stable (not in Fedora repos; used by rice/chrome-launch.sh)"
 echo "  - spicetify, for Spotify theming (used by rice/toggle-theme.sh if present)"
 echo "  - Obsidian, if you want the rice/obsidian/*.css theme"
-echo
-echo "Note: volumeicon is installed and i3/config has a for_window rule for it,"
-echo "but nothing here autostarts it — start it manually, or add an exec line"
-echo "to i3/config if you want it launched on login."
 echo
 echo "Note: rice/toggle-theme.sh hardcodes an Obsidian vault path"
 echo "(/home/clive/code/course/comp sci) — edit that line to your own vault, or"

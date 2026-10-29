@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Proportional memory usage bar, colored green -> red as usage climbs (no
-# percentage shown, styled like storage.sh's disk-usage bar).
+# Memory usage as a short segmented gauge plus GiB used, colored
+# green -> red as usage climbs.
 
 total=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
 avail=$(awk '/MemAvailable/ {print $2}' /proc/meminfo)
 used=$((total - avail))
 pct=$((100 * used / total))
 
-width=10
-filled=$((pct * width / 100))
+width=6
+filled=$(((pct * width + 50) / 100))
 empty=$((width - filled))
 
 if   [ "$pct" -ge 90 ]; then color="#E64553"
@@ -18,7 +18,7 @@ else color="#4CD97B"
 fi
 
 bar=""
-[ "$filled" -gt 0 ] && bar+=$(printf '█%.0s' $(seq 1 "$filled"))
-[ "$empty" -gt 0 ] && bar+=$(printf '░%.0s' $(seq 1 "$empty"))
+[ "$filled" -gt 0 ] && bar+=$(printf '▰%.0s' $(seq 1 "$filled"))
+[ "$empty" -gt 0 ] && bar+=$(printf '▱%.0s' $(seq 1 "$empty"))
 
-printf '%%{F%s}[%s]%%{F-}\n' "$color" "$bar"
+printf '%%{F%s}%s%%{F-} %s\n' "$color" "$bar" "$(awk -v k="$used" 'BEGIN { printf "%.1fG", k / 1048576 }')"

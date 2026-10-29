@@ -11,11 +11,8 @@ CONFIG=~/.config/fastfetch/config-$THEME.jsonc
 
 ARGS=(--config "$CONFIG" --pipe false)
 
-# Always show a random Pokemon (raw ANSI via pokemon-colorscripts, colors
-# and all) instead of the plain diamond; keys/values stay themed.
-if command -v pokemon-colorscripts >/dev/null 2>&1; then
-	ARGS+=(--logo-type command-raw --logo "pokemon-colorscripts --no-title -r")
-fi
+# Info only — no logo/graphic beside it.
+ARGS+=(--logo none)
 
 mapfile -t LINES < <(fastfetch "${ARGS[@]}")
 

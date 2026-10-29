@@ -21,10 +21,11 @@ exec_always --no-startup-id ~/.config/rice/set-monitors.sh
 # Set wallpaper according to whichever theme (bw/invert) was last selected
 exec --no-startup-id ~/.config/rice/set-wallpaper.sh
 
-# Compositor for fades/transparency (restart cleanly on reload)
+# Compositor for fades/transparency (restart cleanly on reload). picom.conf
+# is whichever picom-<theme>.conf toggle-theme.sh last copied in.
 exec_always --no-startup-id "pkill picom; picom --config ~/.config/picom/picom.conf -b"
 
-# Polybar bottom bar replaces the built-in i3bar
+# Polybar top bar replaces the built-in i3bar
 exec_always --no-startup-id ~/.config/polybar/launch.sh
 
 # Start XDG autostart .desktop files using dex. See also
@@ -86,9 +87,9 @@ default_border pixel 2
 default_floating_border pixel 2
 hide_edge_borders smart
 
-# A medium gap between windows
+# A medium gap between windows (screen edges get outer + inner = 12px)
 gaps inner 8
-gaps outer 2
+gaps outer 4
 
 # start a terminal
 bindsym $mod+Return exec kitty
@@ -96,8 +97,9 @@ bindsym $mod+Return exec kitty
 # kill focused window
 bindsym $mod+q kill
 
-# start rofi (black & white themed launcher)
-bindsym $mod+d exec --no-startup-id "rofi -show drun -theme ~/.config/rofi/current.rasi"
+# start rofi launcher (themed; tabs along the bottom flip between apps /
+# windows / run — click them or use Shift+Left/Right)
+bindsym $mod+d exec --no-startup-id "rofi -show drun -modi drun,window,run -theme ~/.config/rofi/current.rasi -theme-str 'mainbox { children: [ inputbar, message, listview, mode-switcher ]; }'"
 
 # rofi calculator, emoji picker and clipboard history (custom script-modi)
 bindsym $mod+comma exec --no-startup-id "rofi -show calc -modi calc:~/.config/rofi/calc.sh -theme ~/.config/rofi/current.rasi"
@@ -110,19 +112,29 @@ bindsym $mod+Shift+p exec --no-startup-id ~/.config/polybar/powermenu.sh
 # rofi bluetooth device picker — also on the polybar bluetooth module (left-click)
 bindsym $mod+Shift+b exec --no-startup-id "rofi -show bluetooth -modi bluetooth:~/.config/rofi/bluetooth.sh -theme ~/.config/rofi/current.rasi"
 
-# toggle between black/white and inverted themes
+# cycle the rice theme: bw -> invert -> catppuccin
 bindsym $mod+Shift+t exec --no-startup-id ~/.config/rice/toggle-theme.sh
+
+# pick a theme from a rofi menu (with palette swatches) instead of cycling
+bindsym $mod+t exec --no-startup-id ~/.config/rice/theme-picker.sh
+
+# shuffle to another wallpaper from the current theme's set
+bindsym $mod+Shift+w exec --no-startup-id ~/.config/rice/set-wallpaper.sh
+
+# rofi window switcher across every workspace
+bindsym $mod+Tab exec --no-startup-id "rofi -show window -theme ~/.config/rofi/current.rasi"
+
+# searchable cheatsheet of every keybinding (Enter runs the selected one)
+bindsym $mod+slash exec --no-startup-id ~/.config/rice/keybinds.sh
+
+# focused window opacity: more see-through / more solid / reset
+bindsym $mod+bracketleft exec --no-startup-id picom-trans -c -5
+bindsym $mod+bracketright exec --no-startup-id picom-trans -c +5
+bindsym $mod+backslash exec --no-startup-id picom-trans -c -d
 
 # save / restore the focused workspace's layout (i3-save-tree based)
 bindsym $mod+Shift+u exec --no-startup-id ~/.config/rice/save-layout.sh
 bindsym $mod+y exec --no-startup-id ~/.config/rice/restore-layout.sh
-
-# toggle the bottom polybar (and re-layout the top bar to compensate)
-bindsym $mod+Shift+y exec --no-startup-id ~/.config/polybar/toggle-bottom.sh
-
-# volumeicon briefly shows a blank top-level window before it embeds into
-# the systray on (re)start; keep it off-screen for that instant.
-for_window [class="Volumeicon"] move scratchpad
 
 # Scratchpad dropdown terminal: $mod+grave summons/hides a kitty marked
 # "scratch_term", spawning it on first use (see scratch-toggle.sh).

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CPU temperature via k10temp (Tctl), styled like the internal/temperature
-# module it replaces: colored diamond ramp green -> red as temp climbs from
+# module it replaces: colored thermometer ramp green -> red as temp climbs from
 # base to warn.
 
 base=40
@@ -23,4 +23,5 @@ if [ "$temp" -ge "$warn" ]; then
   color="#E64553"
 fi
 
-printf '%%{F%s}◈%%{F-} TEMP %s°C\n' "$color" "$temp"
+# nf-md-thermometer
+printf '%%{F%s}%s%%{F-} %s°C\n' "$color" $'\U000f050f' "$temp"
