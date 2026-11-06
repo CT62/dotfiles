@@ -150,6 +150,8 @@ link "$REPO_DIR/autostart/nm-applet.desktop"  "$HOME/.config/autostart/nm-applet
 
 # CopyQ runs headless for the rofi clipboard picker — no tray icon
 copyq config disable_tray true >/dev/null 2>&1 || true
+# Without a tray CopyQ opens its main window on startup unless told to stay hidden
+copyq config hide_main_window true >/dev/null 2>&1 || true
 
 mkdir -p "$HOME/.config/systemd/user"
 link "$REPO_DIR/systemd/user/gammastep-prompt.service" "$HOME/.config/systemd/user/gammastep-prompt.service"
