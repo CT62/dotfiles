@@ -15,8 +15,8 @@ together across all of it. Tiling moves/resizes glide.
 ```
 
 This installs every package the rice needs via `dnf`, then symlinks each
-folder here into place under `~/.config` (and the wallpapers into
-`~/Downloads`), backing up anything already there first.
+folder here into place under `~/.config`, backing up anything already
+there first.
 
 On another distro: install the equivalent packages yourself (see
 `install.sh` for the full list) and symlink the folders the same way.
@@ -41,7 +41,7 @@ After installing, log out and back into i3, or run
 | `rice/` | The glue: `toggle-theme.sh` (cycles bw → invert → catppuccin across everything, or jumps to one given as an argument), `theme-picker.sh` (rofi menu of themes with palette swatches), `keybinds.sh` (searchable cheatsheet of every i3 binding, parsed live from `i3/config`), `set-wallpaper.sh`, lock screen (blurred, theme-toned, with a lock glyph and the date), icon-row power menu (`polybar/powermenu.sh`, `$mod+Shift+p`), on-screen volume/brightness display, workspace layout save/restore, scratchpad terminal, focus-border pulse, `gammastep-prompt.sh` (dusk notification asking whether to turn on warm colors, fired by the `gammastep-prompt` systemd --user timer below), Obsidian theme CSS |
 | `systemd/user/` | `gammastep-prompt.timer` fires at 19:00 daily, running `gammastep-prompt.service` → `rice/gammastep-prompt.sh` |
 | `autostart/` | Per-user `.desktop` overrides (`Hidden=true`) that stop Fedora autostarting `volumeicon` and `nm-applet` — the bar already shows volume and network, so their tray icons were clutter. CopyQ's tray icon is turned off by `install.sh` (`copyq config disable_tray true`) |
-| `wallpapers/` | Images `set-wallpaper.sh` picks from at random — `wallpaper/` for catppuccin, `wallpaper-bw/` for bw, `wallpaper-invert/` for invert |
+| `i3/wallpapers/` | Images `set-wallpaper.sh` picks from at random — `wallpaper/` for catppuccin, `wallpaper-bw/` for bw, `wallpaper-invert/` for invert, `dithered/` for both bw and invert. `wallpapers/` at the repo root is a copy of this folder |
 | `lightdm/` | Login screen greeter config — background is generated at install time from `wallpapers/wallpaper-bw` via the same grayscale/blur/dim treatment `rice/lock.sh` uses, so login and lock screen match. `install.sh` also switches the system's display manager to lightdm if it isn't already |
 | `gtk-3.0/`, `gtk-4.0/` | GTK app theming: dark Adwaita, Adwaita icons/cursor, Cascadia Mono NF |
 | `qt5ct/`, `qt6ct/` | Qt app theming: Fusion style, custom `bw` color scheme, same font. Only takes effect because of the `QT_QPA_PLATFORMTHEME` env var set in `x11/` below |

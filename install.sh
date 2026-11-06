@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # One-command installer for Fedora: installs every package this rice needs,
-# then symlinks each config folder into place under ~/.config (and the
-# wallpapers into ~/Downloads).
+# then symlinks each config folder into place under ~/.config.
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -136,11 +135,6 @@ if ! grep -qF "$BASHRC_MARKER" "$HOME/.bashrc" 2>/dev/null; then
   echo "Adding fastfetch startup snippet to ~/.bashrc"
   { echo; cat "$REPO_DIR/fastfetch/bashrc-snippet.sh"; } >> "$HOME/.bashrc"
 fi
-
-mkdir -p "$HOME/Downloads"
-link "$REPO_DIR/wallpapers/wallpaper"        "$HOME/Downloads/wallpaper"
-link "$REPO_DIR/wallpapers/wallpaper-bw"     "$HOME/Downloads/wallpaper-bw"
-link "$REPO_DIR/wallpapers/wallpaper-invert" "$HOME/Downloads/wallpaper-invert"
 
 # Mask the distro's volumeicon / nm-applet autostarts (polybar shows volume
 # and network itself, so their tray icons are just clutter)
