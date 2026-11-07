@@ -2,3 +2,7 @@
 *.log
 __pycache__/
 *.pyc
+
+# never commit reMarkable cloud credentials
+rmapi.conf
+venv/

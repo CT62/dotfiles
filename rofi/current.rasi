@@ -1,13 +1,13 @@
-/* Catppuccin Mocha rofi theme — palette only; layout lives in layout.rasi */
+/* Black & white rofi theme — palette only; layout lives in layout.rasi */
 
 * {
-    bg:        #1e1e2e;
-    bg-alt:    #181825;
-    fg:        #cdd6f4;
-    dim:       #7f849c;
-    accent:    #cba6f7;
-    accent-fg: #11111b;
-    border:    #45475a;
+    bg:        #000000;
+    bg-alt:    #111111;
+    fg:        #FFFFFF;
+    dim:       #6E6E6E;
+    accent:    #FFFFFF;
+    accent-fg: #000000;
+    border:    #2E2E2E;
 }
 
 configuration {

@@ -1,0 +1,8 @@
+# Python deps for remarkable.py (install.sh puts them in a venv at
+# ~/.local/share/remarkable/venv). Pinned to the versions it was built on.
+textual==8.2.8
+textual-image==0.14.2
+linkify-it-py==2.2.0
+rmc==0.3.0
+CairoSVG==2.9.1
+pypdf==7.0.0

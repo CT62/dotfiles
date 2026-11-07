@@ -10,14 +10,22 @@ killall -q polybar
 
 while pgrep -u "$UID" -x polybar >/dev/null; do sleep 0.5; done
 
-# The bar goes on the primary monitor (falls back to polybar's default
-# monitor when none is marked primary).
-export MONITOR="$(polybar --list-monitors | grep primary | cut -d: -f1)"
-polybar main --config=~/.config/polybar/config.ini >/tmp/polybar.log 2>&1 9>&- &
+# Full "main" bar on the primary monitor (or the first one if none is
+# marked primary), slim "side" bar on every other monitor.
+monitors="$(polybar --list-monitors)"
+primary="$(echo "$monitors" | grep primary | cut -d: -f1)"
+[ -z "$primary" ] && primary="$(echo "$monitors" | head -1 | cut -d: -f1)"
+
+for m in $(echo "$monitors" | cut -d: -f1); do
+  bar=side
+  [ "$m" = "$primary" ] && bar=main
+  MONITOR="$m" polybar "$bar" --config=~/.config/polybar/config.ini \
+    >"/tmp/polybar-$m.log" 2>&1 9>&- &
+done
 
 disown -a
 
 for _ in $(seq 20); do
-  [ "$(pgrep -u "$UID" -x polybar | wc -l)" -ge 1 ] && break
+  [ "$(pgrep -u "$UID" -x polybar | wc -l)" -ge "$(echo "$monitors" | wc -l)" ] && break
   sleep 0.1
 done

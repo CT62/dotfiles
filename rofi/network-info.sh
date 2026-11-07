@@ -45,11 +45,12 @@ if [ -z "${ROFI_RETV:-}" ] || [ "$ROFI_RETV" = "0" ]; then
     DNS=""
   fi
 
-  PING_OUT=$(ping -c 2 -W 1 "$PING_TARGET" 2>/dev/null)
-  LOSS=$(echo "$PING_OUT" | grep -oP '\d+(?=% packet loss)')
-  AVG=$(echo "$PING_OUT" | grep -oP 'rtt.*= [\d.]+/\K[\d.]+' )
-  [ -z "$LOSS" ] && LOSS="?"
-  [ -z "$AVG" ] && AVG="?"
+  # Ping in the background while the throughput sample below sleeps, so
+  # the panel opens in ~0.3s instead of waiting on ping too. Two quick
+  # pings 0.2s apart still give a loss figure.
+  PING_FILE=$(mktemp)
+  ping -c 2 -i 0.2 -W 1 "$PING_TARGET" >"$PING_FILE" 2>/dev/null &
+  PING_PID=$!
 
   RX1=$(cat "/sys/class/net/$IF/statistics/rx_bytes" 2>/dev/null || echo 0)
   TX1=$(cat "/sys/class/net/$IF/statistics/tx_bytes" 2>/dev/null || echo 0)
@@ -58,6 +59,13 @@ if [ -z "${ROFI_RETV:-}" ] || [ "$ROFI_RETV" = "0" ]; then
   TX2=$(cat "/sys/class/net/$IF/statistics/tx_bytes" 2>/dev/null || echo 0)
   RXRATE=$(awk -v a="$RX1" -v b="$RX2" 'BEGIN{printf "%.1f", (b-a)/0.3/1024}')
   TXRATE=$(awk -v a="$TX1" -v b="$TX2" 'BEGIN{printf "%.1f", (b-a)/0.3/1024}')
+
+  wait "$PING_PID" 2>/dev/null
+  PING_OUT=$(cat "$PING_FILE"); rm -f "$PING_FILE"
+  LOSS=$(echo "$PING_OUT" | grep -oP '\d+(?=% packet loss)')
+  AVG=$(echo "$PING_OUT" | grep -oP 'rtt.*= [\d.]+/\K[\d.]+' )
+  [ -z "$LOSS" ] && LOSS="?"
+  [ -z "$AVG" ] && AVG="?"
 
   printf '\0prompt\x1fnetwork\n'
   printf '\0message\x1f%s (wired)  |  IP %s  |  Gateway %s  |  DNS %s  |  Ping %sms  |  Loss %s%%  |  ↓ %s KB/s  |  ↑ %s KB/s\n' \

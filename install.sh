@@ -128,6 +128,26 @@ chmod +x "$POKEMON_DIR/pokemon-colorscripts.py"
 mkdir -p "$HOME/.local/bin"
 link "$POKEMON_DIR/pokemon-colorscripts.py" "$HOME/.local/bin/pokemon-colorscripts"
 
+# remarkable: terminal app for the reMarkable cloud (see remarkable/).
+# Needs rmapi (not packaged — fetched from its GitHub release) and a venv
+# for its Python deps. Your rmapi login (~/.config/rmapi/rmapi.conf) is
+# never stored in this repo; run `rmapi` once to pair the tablet.
+RMAPI_VERSION=v0.0.35
+if ! command -v rmapi >/dev/null 2>&1 && [ ! -x "$HOME/.local/bin/rmapi" ]; then
+  echo "Downloading rmapi $RMAPI_VERSION..."
+  curl -fsSL "https://github.com/ddvk/rmapi/releases/download/$RMAPI_VERSION/rmapi-linux-amd64.tar.gz" \
+    | tar -xz -C "$HOME/.local/bin" rmapi
+fi
+RM_DIR="$HOME/.local/share/remarkable"
+mkdir -p "$RM_DIR"
+if [ ! -x "$RM_DIR/venv/bin/python" ]; then
+  echo "Creating remarkable venv..."
+  python3 -m venv "$RM_DIR/venv"
+fi
+"$RM_DIR/venv/bin/pip" install -q -r "$REPO_DIR/remarkable/requirements.txt"
+link "$REPO_DIR/remarkable/remarkable.py" "$RM_DIR/remarkable.py"
+link "$REPO_DIR/remarkable/remarkable"    "$HOME/.local/bin/remarkable"
+
 # Append the fastfetch-on-shell-open snippet to .bashrc if it's not there yet
 # (appended, not symlinked, so Fedora's default .bashrc content is kept).
 BASHRC_MARKER="# Animated, theme-matched fastfetch on new interactive shells"
