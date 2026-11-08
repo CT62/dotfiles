@@ -96,23 +96,12 @@ mkdir -p "$HOME/.bashrc.d"
 link "$REPO_DIR/bash/bashrc.d/aliases.sh"   "$HOME/.bashrc.d/aliases.sh"
 link "$REPO_DIR/bash/bashrc.d/git-title.sh" "$HOME/.bashrc.d/git-title.sh"
 
-# Login screen: themed to match rice/lock.sh's blurred/desaturated look.
+# Login screen: same artwork as the lock screen (rice/lock-art.sh).
 # Needs sudo since it writes under /etc and /usr/share — done here instead
 # of via link() so a non-Fedora/non-lightdm system can skip it cleanly.
-if command -v convert >/dev/null 2>&1 && [ -d /etc/lightdm ]; then
+if command -v magick >/dev/null 2>&1 && [ -d /etc/lightdm ]; then
   echo "Setting up themed lightdm greeter..."
-  GREETER_CONF=/etc/lightdm/lightdm-gtk-greeter.conf
-  GREETER_BG=/usr/share/backgrounds/lockscreen-greeter-bw.png
-  if [ -f "$GREETER_CONF" ] && [ ! -L "$GREETER_CONF" ]; then
-    sudo cp "$GREETER_CONF" "$GREETER_CONF.bak.$(date +%s)"
-  fi
-  SRC_WALLPAPER="$REPO_DIR/wallpapers/wallpaper-bw/night-field-walker.jpg"
-  TMP_BG=$(mktemp --suffix=.png)
-  convert "$SRC_WALLPAPER" -colorspace Gray -blur 0x8 -modulate 35 "$TMP_BG"
-  sudo install -m 644 "$TMP_BG" "$GREETER_BG"
-  rm -f "$TMP_BG"
-  sudo install -m 644 "$REPO_DIR/lightdm/lightdm-gtk-greeter.conf" "$GREETER_CONF"
-  echo "Greeter themed. Takes effect next login/reboot."
+  "$REPO_DIR/lightdm/install-greeter.sh"
 fi
 
 # pokemon-colorscripts isn't packaged for Fedora — clone it straight from

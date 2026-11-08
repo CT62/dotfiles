@@ -1,0 +1,147 @@
+/* GTK theme for lightdm-gtk-greeter only: the stock grey dialog becomes a
+ * borderless black panel on the plain black login background (rice/lock-art.sh).
+ * Widget ids come from the greeter's built-in UI (login_window, etc.). */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+
+* {
+  font-family: "Cascadia Mono NF";
+  -gtk-icon-shadow: none;
+  text-shadow: none;
+}
+
+/* ---- login + power panels ---------------------------------------------- */
+#login_window,
+#power_window {
+  background: #000000;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 26px 30px 22px;
+}
+
+#content_frame,
+#power_content_frame { padding: 0 0 16px; }
+
+#buttonbox_frame,
+#power_buttonbox_frame {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+#user_image_border,
+#user_image { background: transparent; border: none; }
+
+#login_window label,
+#power_window label { color: #b4b4b4; }
+
+#message_label { color: #6e6e6e; font-size: 9pt; }
+
+/* ---- inputs -------------------------------------------------------------- */
+#login_window entry,
+#user_combobox button {
+  background: #000000;
+  color: #ffffff;
+  caret-color: #ffffff;
+  border: 1px solid #3a3a3a;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 34px;
+  padding: 0 12px;
+  letter-spacing: 1px;
+}
+
+#login_window entry:focus,
+#user_combobox button:focus,
+#user_combobox button:hover { border-color: #ffffff; }
+
+#login_window entry selection { background: #ffffff; color: #000000; }
+#login_window entry placeholder { color: #4a4a4a; }
+
+/* ---- buttons ------------------------------------------------------------- */
+#login_window button,
+#power_window button {
+  background: transparent;
+  color: #b4b4b4;
+  border: 1px solid #3a3a3a;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 30px;
+  padding: 0 18px;
+  letter-spacing: 2px;
+}
+
+#login_window button:hover,
+#power_window button:hover { border-color: #ffffff; color: #ffffff; }
+
+#login_window button label,
+#power_window button label { color: inherit; }
+
+#login_window #login_button,
+#power_window #power_ok_button {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: bold;
+}
+
+#login_window #login_button:hover,
+#power_window #power_ok_button:hover { background: #d0d0d0; border-color: #d0d0d0; color: #000000; }
+
+/* ---- error / info bar ---------------------------------------------------- */
+#greeter_infobar,
+#greeter_infobar > revealer > box {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+#greeter_infobar label { color: #ffffff; }
+
+/* ---- top panel: transparent strip, dim text, white on hover -------------- */
+#panel_window {
+  background: transparent;
+  color: #6e6e6e;
+  padding: 10px 40px 0;
+}
+
+#panel_window menubar { background: transparent; border: none; box-shadow: none; }
+
+#panel_window menubar > menuitem {
+  color: #6e6e6e;
+  padding: 4px 10px;
+  border: none;
+  letter-spacing: 2px;
+}
+
+#panel_window menubar > menuitem:hover {
+  background: transparent;
+  color: #ffffff;
+  box-shadow: inset 0 -1px #ffffff;
+}
+
+#panel_window menubar > menuitem label,
+#panel_window menubar > menuitem image { color: inherit; }
+
+/* dropdown menus (session, power, a11y) */
+menu,
+.menu,
+.context-menu {
+  background: #000000;
+  border: 1px solid #2a2a2a;
+  border-radius: 0;
+  padding: 4px 0;
+}
+
+menu menuitem,
+.menu menuitem { color: #b4b4b4; padding: 6px 14px; }
+
+menu menuitem:hover,
+.menu menuitem:hover { background: #ffffff; color: #000000; }
+
+menu radio,
+menu check { color: inherit; }
+
+/* combobox dropdown and window shadows */
+window.popup,
+.csd.popup decoration,
+decoration { border-radius: 0; box-shadow: none; }

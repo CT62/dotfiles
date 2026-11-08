@@ -130,7 +130,8 @@ bindsym $mod+grave exec --no-startup-id ~/.config/rice/scratch-toggle.sh
 bindsym $mod+h focus left
 bindsym $mod+j focus down
 bindsym $mod+k focus up
-bindsym $mod+l focus right
+# $mod+l locks the screen (focus right is still on $mod+Right)
+bindsym $mod+l exec --no-startup-id loginctl lock-session
 
 # alternatively, you can use the cursor keys:
 bindsym $mod+Left focus left
