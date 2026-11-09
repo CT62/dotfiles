@@ -28,6 +28,8 @@ PACKAGES=(
   cascadia-mono-nf-fonts
   # system info on terminal open (see fastfetch/)
   fastfetch git
+  # dime sync: reads the Windows registry off the NTFS partition (see dime/)
+  chntpw ntfs-3g
 )
 
 if command -v dnf >/dev/null 2>&1; then
@@ -136,6 +138,11 @@ fi
 "$RM_DIR/venv/bin/pip" install -q -r "$REPO_DIR/remarkable/requirements.txt"
 link "$REPO_DIR/remarkable/remarkable.py" "$RM_DIR/remarkable.py"
 link "$REPO_DIR/remarkable/remarkable"    "$HOME/.local/bin/remarkable"
+
+# dime: connect / re-pair the Dime 3 earbuds (see dime/). Pure bash on top of
+# bluez + pactl; `dime sync` also uses chntpw/ntfs-3g from PACKAGES above.
+chmod +x "$REPO_DIR/dime/dime"
+link "$REPO_DIR/dime/dime" "$HOME/.local/bin/dime"
 
 # Append the fastfetch-on-shell-open snippet to .bashrc if it's not there yet
 # (appended, not symlinked, so Fedora's default .bashrc content is kept).

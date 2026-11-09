@@ -6,8 +6,8 @@
 #
 # Deliberately minimal: a plain black canvas with a few lines of text.
 # Lock mode: a small padlock in the centre (i3lock's typing ring draws around
-# it), the date below and a dim hint. Greeter mode: just the hostname, sitting
-# above the GTK login box, which is centred on the screen.
+# it), the date below and a dim hint. Greeter mode: plain black, nothing else;
+# the GTK login box is the only thing on screen, centred.
 set -euo pipefail
 
 MODE=$1 W=$2 H=$3 OUT=$4
@@ -22,10 +22,7 @@ REG=Cascadia-Mono-NF-Regular
 THIN=Cascadia-Mono-NF-Light
 
 if [[ $MODE == greeter ]]; then
-  TITLE=$(hostname -s)
-  magick -size "${W}x${H}" xc:black -gravity center \
-    -font "$THIN" -kerning 6 -fill "$FG" -pointsize 22 -annotate +0-150 "$TITLE" \
-    "$OUT"
+  magick -size "${W}x${H}" xc:black "$OUT"
 else
   GLYPH=$'\U000f033e'                                   # nf-md-lock
   DATE=$(date '+%A %d %B' | tr '[:upper:]' '[:lower:]')

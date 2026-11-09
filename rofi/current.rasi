@@ -1,17 +1,18 @@
-/* Black & white rofi theme — palette only; layout lives in layout.rasi */
+/* Inverted (snowy field) rofi theme — palette only; layout lives in
+   layout.rasi */
 
 * {
-    bg:        #000000;
-    bg-alt:    #111111;
-    fg:        #FFFFFF;
-    dim:       #6E6E6E;
-    accent:    #FFFFFF;
-    accent-fg: #000000;
-    border:    #2E2E2E;
+    bg:        #E9E9E6;
+    bg-alt:    #DCDCD7;
+    fg:        #161616;
+    dim:       #6E6E68;
+    accent:    #161616;
+    accent-fg: #E9E9E6;
+    border:    #C4C4BE;
 }
 
 configuration {
-    icon-theme: "breeze-dark";
+    icon-theme: "breeze";
 }
 
 @import "layout.rasi"

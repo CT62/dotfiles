@@ -1,0 +1,342 @@
+#!/usr/bin/env bash
+# dime — connect to Dime 3 earbuds, and repair the pairing automatically
+#        when Windows (dual-boot) has stolen it.
+#
+#   dime            connect (re-pairs automatically if the pairing is broken)
+#   dime status     show connection / battery / pairing state
+#   dime reset      forget + re-pair right now
+#   dime off        disconnect
+#   dime sync       import the Windows pairing key so BOTH OSes work (needs sudo)
+#   dime help
+
+MAC="E8:8F:16:46:94:4A"
+NAME="Dime 3"
+
+# ── look ───────────────────────────────────────────────────────────────────
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  B=$'\e[1m' D=$'\e[2m' R=$'\e[0m'
+  RED=$'\e[38;5;203m' GRN=$'\e[38;5;114m' YLW=$'\e[38;5;221m'
+  BLU=$'\e[38;5;111m' MAG=$'\e[38;5;176m' GRY=$'\e[38;5;245m'
+  TTY=1
+else
+  B= D= R= RED= GRN= YLW= BLU= MAG= GRY= TTY=
+fi
+
+header() {
+  printf '\n  %s◖ dime ◗%s  %s%s%s %s%s%s\n\n' "$B$MAG" "$R" "$B" "$NAME" "$R" "$GRY" "$MAC" "$R"
+}
+ok()   { printf '  %s✓%s %s\n' "$GRN" "$R" "$*"; }
+bad()  { printf '  %s✗%s %s\n' "$RED" "$R" "$*"; }
+warn() { printf '  %s!%s %s\n' "$YLW" "$R" "$*"; }
+info() { printf '  %s•%s %s\n' "$BLU" "$R" "$*"; }
+note() { printf '    %s%s%s\n' "$GRY" "$*" "$R"; }
+
+# spin "message" cmd args...  → runs cmd, shows a spinner, keeps output in $OUT
+OUT=
+spin() {
+  local msg=$1; shift
+  local tmp; tmp=$(mktemp)
+  "$@" >"$tmp" 2>&1 &
+  local pid=$! i=0 frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  if [[ $TTY ]]; then
+    printf '\e[?25l'
+    while kill -0 "$pid" 2>/dev/null; do
+      printf '\r  %s%s%s %s' "$BLU" "${frames:i++%10:1}" "$R" "$msg"
+      sleep 0.08
+    done
+    printf '\r\e[2K\e[?25h'
+  fi
+  wait "$pid"; local rc=$?
+  OUT=$(<"$tmp"); rm -f "$tmp"
+  return $rc
+}
+trap '[[ $TTY ]] && printf "\e[?25h"' EXIT
+trap 'printf "\n"; exit 130' INT
+
+# ── bluetooth helpers ──────────────────────────────────────────────────────
+bt()          { bluetoothctl "$@"; }
+dev_info()    { bt info "$MAC" 2>/dev/null; }
+is_connected(){ dev_info | grep -q 'Connected: yes'; }
+is_known()    { dev_info | grep -q 'Name:'; }
+is_paired()   { dev_info | grep -q 'Paired: yes'; }
+battery()     { dev_info | sed -n 's/.*Battery Percentage: .*(\([0-9]*\)).*/\1/p'; }
+adapter_mac() { bt show 2>/dev/null | awk '/^Controller/{print $2; exit}'; }
+
+battery_bar() {
+  local p=$1 n=$(( ($1 + 5) / 10 )) col=$GRN bar=
+  (( p <= 20 )) && col=$RED
+  (( p > 20 && p <= 50 )) && col=$YLW
+  for ((i=0; i<10; i++)); do (( i < n )) && bar+="█" || bar+="░"; done
+  printf '%s%s%s %s%%' "$col" "$bar" "$R" "$p"
+}
+
+try_connect() {
+  # bluetoothctl prints e.g. "Failed to connect: org.bluez.Error.Failed br-connection-key-missing"
+  bt --timeout 12 connect "$MAC" 2>&1
+  is_connected
+}
+
+# Waits until the audio sink shows up and makes it the default output.
+route_audio() {
+  local tag=${MAC//:/_} sink=
+  for _ in {1..20}; do
+    sink=$(pactl list short sinks 2>/dev/null | awk -v t="$tag" '$2 ~ t {print $2; exit}')
+    [[ -n $sink ]] && break
+    sleep 0.25
+  done
+  if [[ -n $sink ]]; then
+    pactl set-default-sink "$sink" 2>/dev/null && ok "Audio routed to $NAME"
+  else
+    warn "Connected, but no audio output appeared yet — check your sound settings."
+  fi
+}
+
+show_connected() {
+  local b; b=$(battery)
+  ok "${B}Connected${R}"
+  [[ -n $b ]] && printf '  %s▮%s Battery  %s\n' "$GRY" "$R" "$(battery_bar "$b")"
+}
+
+# ── diagnosis ──────────────────────────────────────────────────────────────
+# Looks at bluetoothctl output + bluetoothd's log since $1 and explains why.
+# Sets CAUSE to one of: key | away | busy | unknown
+CAUSE=
+diagnose() {
+  local since=$1 text=$2 log
+  log=$(journalctl -u bluetooth --since "@$since" --no-pager -q 2>/dev/null)
+  text+=$'\n'"$log"
+
+  if grep -qiE 'key-missing|Permission denied \(13\)|Authentication Failed|auth.*fail|PIN or Key Missing|Invalid exchange' <<<"$text"; then
+    CAUSE=key
+    bad "The earbuds rejected this computer's pairing key."
+    if lsblk -no FSTYPE 2>/dev/null | grep -qi ntfs; then
+      note "This PC dual-boots Windows using the same Bluetooth adapter. When Windows"
+      note "pairs with the Dime 3 it makes a new key, and the earbuds overwrite the"
+      note "one Linux has. Linux then offers the old key and gets refused."
+      note "Permanent fix: run ${R}${B}dime sync${R}${GRY} once (see ${R}dime help${GRY})."
+    else
+      note "They were probably paired with another device since, so the key Linux"
+      note "has is no longer valid."
+    fi
+  elif grep -qiE 'page-timeout|Host is down|not available|Connection timed out|create-socket' <<<"$text"; then
+    CAUSE=away
+    bad "The earbuds didn't answer."
+    note "They may be in the case, switched off, out of range — or still connected to"
+    note "another device (e.g. your phone)."
+  elif grep -qiE 'Connection refused|Busy|in progress' <<<"$text"; then
+    CAUSE=busy
+    bad "The earbuds refused the connection (they may be busy with another device)."
+  else
+    CAUSE=unknown
+    bad "Couldn't connect, and the logs don't say why."
+  fi
+}
+
+# ── forget + re-pair ───────────────────────────────────────────────────────
+wait_for_device() {
+  # scan in the background and wait for the earbuds to be advertised
+  bt --timeout 45 scan on >/dev/null 2>&1 &
+  local scan=$!
+  for _ in {1..90}; do
+    is_known && { kill "$scan" 2>/dev/null; return 0; }
+    sleep 0.5
+  done
+  kill "$scan" 2>/dev/null
+  return 1
+}
+
+repair() {
+  printf '\n  %s%s── Re-pairing ──%s\n\n' "$B" "$MAG" "$R"
+
+  if is_known; then
+    spin "Forgetting $NAME…" bt remove "$MAC" && ok "Forgot old pairing" \
+      || warn "Couldn't remove the old pairing (continuing anyway)"
+  fi
+
+  info "${B}Put the earbuds in pairing mode:${R}"
+  note "Take both earbuds out of the case. If they don't show up, put them back in"
+  note "the case for a few seconds and take them out again. Make sure they're not"
+  note "connected to a phone or another computer."
+  echo
+
+  bt pairable on >/dev/null 2>&1
+  if ! spin "Searching for $NAME… (up to 45s)" wait_for_device; then
+    bad "Couldn't find the earbuds."
+    note "Make sure they're out of the case, nearby, and in pairing mode, then run ${R}dime reset${GRY}."
+    return 1
+  fi
+  ok "Found $NAME"
+
+  if ! spin "Pairing…" bt --timeout 20 pair "$MAC" || ! is_paired; then
+    bad "Pairing failed."
+    [[ -n $OUT ]] && note "$(tail -n 1 <<<"$OUT")"
+    return 1
+  fi
+  ok "Paired"
+
+  spin "Trusting…" bt trust "$MAC" && ok "Trusted (will auto-reconnect)"
+
+  if spin "Connecting…" try_connect; then
+    show_connected
+    route_audio
+    return 0
+  fi
+  bad "Paired, but the connection failed. Try running ${B}dime${R} again."
+  return 1
+}
+
+# ── commands ───────────────────────────────────────────────────────────────
+cmd_connect() {
+  header
+  if ! spin "Powering on Bluetooth…" bt power on; then
+    bad "Bluetooth adapter didn't power on."
+    note "Try: ${R}rfkill unblock bluetooth${GRY}  or  ${R}sudo systemctl restart bluetooth"
+    exit 1
+  fi
+
+  if is_connected; then
+    show_connected; route_audio; echo; return 0
+  fi
+
+  if ! is_paired; then
+    warn "$NAME isn't paired with this computer."
+    repair; local rc=$?; echo; return $rc
+  fi
+
+  local start; start=$(date +%s) all=
+  for i in 1 2; do
+    if spin "Connecting to $NAME… ${D}(attempt $i/2)${R}" try_connect; then
+      show_connected; route_audio; echo; return 0
+    fi
+    all+=$OUT$'\n'
+    sleep 1
+  done
+
+  diagnose "$start" "$all"
+  # As requested: any failure is treated as a broken pairing → forget + re-pair.
+  # (If they're simply in the case, re-pairing will just time out harmlessly.)
+  repair; local rc=$?; echo; return $rc
+}
+
+cmd_status() {
+  header
+  local i; i=$(dev_info)
+  if [[ -z $i ]] || ! grep -q 'Name:' <<<"$i"; then
+    bad "Not known to this computer (run ${B}dime${R} to pair)"; echo; return 1
+  fi
+  local f
+  for f in Paired Trusted Connected; do
+    if grep -q "$f: yes" <<<"$i"; then ok "$f"; else bad "$f"; fi
+  done
+  local b; b=$(battery)
+  [[ -n $b ]] && printf '  %s▮%s Battery  %s\n' "$GRY" "$R" "$(battery_bar "$b")"
+  echo
+}
+
+cmd_off() {
+  header
+  if ! is_connected; then info "Already disconnected."; echo; return 0; fi
+  spin "Disconnecting…" bt disconnect "$MAC" && ok "Disconnected" || bad "Couldn't disconnect"
+  echo
+}
+
+cmd_reset() {
+  header
+  bt power on >/dev/null 2>&1
+  repair; local rc=$?; echo; return $rc
+}
+
+# Copy the link key Windows uses into BlueZ, so both OSes share one pairing.
+cmd_sync() {
+  header
+  info "${B}Sync pairing key from Windows${R}"
+  note "Do this once: pair in Linux (dime reset) → boot Windows and pair there →"
+  note "boot back into Linux → run dime sync. After that both systems use the same"
+  note "key and you won't need to re-pair when switching."
+  echo
+
+  if ! command -v reged >/dev/null; then
+    bad "Needs the ${B}chntpw${R} package to read the Windows registry."
+    note "Install it with: ${R}sudo dnf install chntpw"
+    echo; return 1
+  fi
+
+  local amac; amac=$(adapter_mac)
+  [[ -z $amac ]] && { bad "No Bluetooth adapter found."; return 1; }
+  local akey=${amac//:/} dkey=${MAC//:/}
+  akey=${akey,,}; dkey=${dkey,,}
+
+  local mnt; mnt=$(mktemp -d /tmp/dime-win.XXXX)
+  local part= p
+  info "Looking for the Windows partition (sudo needed)…"
+  for p in $(lsblk -rnpo NAME,FSTYPE | awk '$2=="ntfs"{print $1}'); do
+    sudo mount -o ro "$p" "$mnt" 2>/dev/null || sudo mount -t ntfs-3g -o ro "$p" "$mnt" 2>/dev/null || continue
+    if [[ -f $mnt/Windows/System32/config/SYSTEM ]]; then part=$p; break; fi
+    sudo umount "$mnt"
+  done
+  if [[ -z $part ]]; then
+    bad "Couldn't mount a Windows partition read-only."
+    note "If Windows uses Fast Startup/hibernation, disable it in Windows (Power"
+    note "Options → 'Turn on fast startup') and shut down fully, then try again."
+    rmdir "$mnt"; echo; return 1
+  fi
+  ok "Mounted $part read-only"
+
+  local reg; reg=$(mktemp)
+  sudo reged -x "$mnt/Windows/System32/config/SYSTEM" 'HKEY_LOCAL_MACHINE\SYSTEM' \
+    '\ControlSet001\Services\BTHPORT\Parameters\Keys' "$reg" >/dev/null 2>&1
+  sudo umount "$mnt"; rmdir "$mnt"
+
+  # Line looks like: "e88f1646944a"=hex:12,34,...
+  local key
+  key=$(sudo cat "$reg" 2>/dev/null | tr -d '\r' \
+    | awk -v a="$akey" -v d="$dkey" '
+        /^\[/ { insec = (tolower($0) ~ "\\\\keys\\\\" a "\\]$") ; next }
+        insec && tolower($0) ~ "^\"" d "\"=hex:" { sub(/^[^:]*:/, ""); gsub(/,/, ""); print toupper($0); exit }')
+  sudo rm -f "$reg"
+
+  if [[ ! $key =~ ^[0-9A-F]{32}$ ]]; then
+    bad "Windows doesn't have a pairing key for $NAME on this adapter."
+    note "Pair the earbuds in Windows first, then come back and run dime sync."
+    echo; return 1
+  fi
+  ok "Found Windows key for $NAME"
+
+  local f="/var/lib/bluetooth/$amac/$MAC/info"
+  if ! sudo test -f "$f"; then
+    bad "Linux has no pairing for $NAME yet — run ${B}dime reset${R} first."
+    echo; return 1
+  fi
+  sudo cp "$f" "$f.dime-bak"
+  sudo sed -i "/^\[LinkKey\]/,/^\[/ s/^Key=.*/Key=$key/" "$f"
+  ok "Updated Linux pairing key ${GRY}(backup: $f.dime-bak)${R}"
+
+  spin "Restarting Bluetooth…" sudo systemctl restart bluetooth && sleep 2
+  ok "Done — both Windows and Linux now share the same pairing."
+  echo
+  cmd_connect_quiet
+}
+cmd_connect_quiet() { bt power on >/dev/null 2>&1; spin "Connecting…" try_connect && { show_connected; route_audio; echo; }; }
+
+cmd_help() {
+  header
+  cat <<EOF
+  ${B}dime${R}          connect (forgets + re-pairs automatically if it fails)
+  ${B}dime status${R}   pairing / connection / battery
+  ${B}dime reset${R}    forget + re-pair now
+  ${B}dime off${R}      disconnect
+  ${B}dime sync${R}     copy the Windows pairing key into Linux so you can switch
+                OSes without re-pairing ${GRY}(needs sudo + chntpw)${R}
+
+EOF
+}
+
+case "${1:-}" in
+  ""|connect|on)      cmd_connect ;;
+  status|s)           cmd_status ;;
+  reset|repair|pair)  cmd_reset ;;
+  off|disconnect)     cmd_off ;;
+  sync|fix-dualboot)  cmd_sync ;;
+  help|-h|--help)     cmd_help ;;
+  *) bad "Unknown command: $1"; cmd_help; exit 2 ;;
+esac
