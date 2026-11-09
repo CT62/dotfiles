@@ -30,6 +30,8 @@ PACKAGES=(
   fastfetch git
   # dime sync: reads the Windows registry off the NTFS partition (see dime/)
   chntpw ntfs-3g
+  # $mod+g types the GitHub token into the focused window (rice/paste-github-token.sh)
+  xdotool
 )
 
 if command -v dnf >/dev/null 2>&1; then

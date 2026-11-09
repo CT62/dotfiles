@@ -106,6 +106,9 @@ bindsym $mod+t exec --no-startup-id ~/.config/rice/theme-picker.sh
 # shuffle to another wallpaper from the current theme's set
 bindsym $mod+Shift+w exec --no-startup-id ~/.config/rice/set-wallpaper.sh
 
+# type the GitHub token (from ~/github_token.txt) into the focused window
+bindsym --release $mod+g exec --no-startup-id ~/.config/rice/paste-github-token.sh
+
 # rofi window switcher across every workspace
 bindsym $mod+Tab exec --no-startup-id "rofi -show window -theme ~/.config/rofi/current.rasi"
 
