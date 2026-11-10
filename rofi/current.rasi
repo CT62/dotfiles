@@ -1,18 +1,17 @@
-/* Inverted (snowy field) rofi theme — palette only; layout lives in
-   layout.rasi */
+/* Catppuccin Mocha rofi theme — palette only; layout lives in layout.rasi */
 
 * {
-    bg:        #E9E9E6;
-    bg-alt:    #DCDCD7;
-    fg:        #161616;
-    dim:       #6E6E68;
-    accent:    #161616;
-    accent-fg: #E9E9E6;
-    border:    #C4C4BE;
+    bg:        #1e1e2e;
+    bg-alt:    #181825;
+    fg:        #cdd6f4;
+    dim:       #7f849c;
+    accent:    #cba6f7;
+    accent-fg: #11111b;
+    border:    #45475a;
 }
 
 configuration {
-    icon-theme: "breeze";
+    icon-theme: "breeze-dark";
 }
 
 @import "layout.rasi"
